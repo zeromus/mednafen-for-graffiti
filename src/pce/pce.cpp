@@ -271,7 +271,28 @@ static DECLFW(IOWrite)
 		//{
 		// PCE_DEBUG("I/O Unmapped Write: %04x %02x\n", A, V);
 		//}
-		SubHW_WriteIOPage(A, V);
+		//SubHW_WriteIOPage(A, V);
+    static FILE *fp = NULL;
+    static bool filename_delivered = false;
+    static char fn[200];
+    static unsigned char i=0;
+    if (!filename_delivered)
+    {
+      fn[i++] = V;
+      if (V == 0)
+      {
+        filename_delivered = true;
+        fp = fopen(fn, "wb");
+      }
+    }
+    else
+    {
+      if (fp)
+      {
+        fputc(V, fp);
+        fflush(fp);
+      }
+    }
 		break;
  }
 }
