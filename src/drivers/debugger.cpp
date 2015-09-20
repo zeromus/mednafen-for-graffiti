@@ -1883,6 +1883,9 @@ void Debugger_Init(void)
 	 Debugger_GT_Toggle();
 	 Debugger_GT_ForceSteppingMode();
 	}
+
+  OpBreakpoints = std::string("0");
+  UpdateBreakpoints(OpBreakpoints, BPOINT_OP);
 }
 
 void Debugger_Kill(void)
