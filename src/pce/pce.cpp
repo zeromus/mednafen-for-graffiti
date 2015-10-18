@@ -556,6 +556,7 @@ static int LoadCommon(void)
 
 #ifdef WANT_DEBUGGER
  PCEDBG_Init(IsSGX, psg);
+ //PCEDBG_AddBreakPoint (8, 0, 0, true);
 #endif
 
 

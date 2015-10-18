@@ -7,7 +7,7 @@
 
 namespace MDFN_IEN_PCE
 {
-
+void PCEDBG_MuteChannel(uint8 channel);
 void PCEDBG_MachineStateChanged(void);
 
 void PCEDBG_FlushBreakPoints(int type);

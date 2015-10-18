@@ -1116,6 +1116,7 @@ DebuggerInfoStruct PCEDBGInfo =
  GetBranchTrace,
  SetGraphicsDecode,
  PCEDBG_SetLogFunc,
+ PCEDBG_MuteChannel,
 };
 
 static void Cleanup(void)
@@ -1125,6 +1126,11 @@ static void Cleanup(void)
   delete ShadowCPU;
   ShadowCPU = NULL;
  }
+}
+
+void PCEDBG_MuteChannel(uint8 chan)
+{
+  psg->MuteChannel(chan);
 }
 
 void PCEDBG_Kill(void)

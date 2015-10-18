@@ -174,7 +174,7 @@ typedef struct
  void (*SetGraphicsDecode)(MDFN_Surface *surface, int line, int which, int xscroll, int yscroll, int pbn);
 
  void (*SetLogFunc)(void (*logfunc)(const char *type, const char *text));
-
+ void (*MuteChannel)(uint8 chan);
  // Game emulation code shouldn't touch these directly.
  std::vector<AddressSpaceType> *AddressSpaces;
  std::vector<RegGroupType*> *RegGroups;

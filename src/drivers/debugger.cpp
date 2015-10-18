@@ -1486,6 +1486,29 @@ void Debugger_GT_Event(const SDL_Event *event)
      default: break;
     }
    }
+   else if(event->key.keysym.mod & KMOD_SHIFT)
+   {
+    switch(event->key.keysym.sym)
+    {
+     if (CurGame->Debugger->MuteChannel)
+     {
+      case SDLK_1: CurGame->Debugger->MuteChannel(0);
+       break;
+      case SDLK_2: CurGame->Debugger->MuteChannel(1);
+       break;
+      case SDLK_3: CurGame->Debugger->MuteChannel(2);
+       break;
+      case SDLK_4: CurGame->Debugger->MuteChannel(3);
+       break;
+      case SDLK_5: CurGame->Debugger->MuteChannel(4);
+       break;
+      case SDLK_6: CurGame->Debugger->MuteChannel(5);
+       break;
+     }
+
+     default: break;
+    }
+   }
   }
 
   if(WhichMode == 1)
@@ -1884,8 +1907,8 @@ void Debugger_Init(void)
 	 Debugger_GT_ForceSteppingMode();
 	}
 
-  OpBreakpoints = std::string("0");
-  UpdateBreakpoints(OpBreakpoints, BPOINT_OP);
+  //OpBreakpoints = std::string("0");
+  //UpdateBreakpoints(OpBreakpoints, BPOINT_OP);
 }
 
 void Debugger_Kill(void)
