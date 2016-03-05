@@ -1115,6 +1115,7 @@ static void DoSimpleCommand(int cmd)
 
 static MDFNSetting PCESettings[] = 
 {
+  { "pce.input.buttons6", MDFNSF_EMU_STATE | MDFNSF_UNTRUSTED_SAFE, gettext_noop("Enable 6-button mode for all gamepads on startup."), NULL, MDFNST_BOOL, "0" },
   { "pce.input.multitap", MDFNSF_EMU_STATE | MDFNSF_UNTRUSTED_SAFE, gettext_noop("Enable multitap(TurboTap) emulation."), NULL, MDFNST_BOOL, "1" },
 
   { "pce.slstart", MDFNSF_NOFLAGS, gettext_noop("First rendered scanline."), NULL, MDFNST_UINT, "4", "0", "239" },

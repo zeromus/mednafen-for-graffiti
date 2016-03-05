@@ -25,7 +25,7 @@ namespace MDFN_IEN_PCE
 class PCE_Input_Gamepad : public PCE_Input_Device
 {
  public:
- PCE_Input_Gamepad();
+ PCE_Input_Gamepad(bool button6);
  virtual void TransformInput(uint8* data, const bool DisableSR) override;
  virtual void Power(int32 timestamp) override;
  virtual void Write(int32 timestamp, bool old_SEL, bool new_SEL, bool old_CLR, bool new_CLR) override;
@@ -38,11 +38,13 @@ class PCE_Input_Gamepad : public PCE_Input_Device
  bool SEL, CLR;
  uint16 buttons;
  bool AVPad6Which;
+ bool buttons6;
 };
 
 
-PCE_Input_Gamepad::PCE_Input_Gamepad()
+PCE_Input_Gamepad::PCE_Input_Gamepad(bool button6)
 {
+ buttons6 = button6;
  Power(0); // FIXME?
 }
 
@@ -65,6 +67,8 @@ void PCE_Input_Gamepad::TransformInput(uint8* data, const bool DisableSR)
 
   MDFN_en16lsb(data, tmp);
  }
+
+ data[1] |= buttons6 << 4;
 }
 
 void PCE_Input_Gamepad::Update(const void *data)
@@ -147,7 +151,7 @@ const IDIISG PCE_GamepadIDII =
 
 PCE_Input_Device *PCEINPUT_MakeGamepad(void)
 {
- return new PCE_Input_Gamepad();
+ return new PCE_Input_Gamepad(MDFN_GetSettingB("pce.input.buttons6"));
 }
 
 };
