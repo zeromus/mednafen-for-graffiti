@@ -1907,8 +1907,13 @@ void Debugger_Init(void)
 	 Debugger_GT_ForceSteppingMode();
 	}
 
-  //OpBreakpoints = std::string("0");
-  //UpdateBreakpoints(OpBreakpoints, BPOINT_OP);
+  // Add BRK opcode breakpoint automatically if using PCE module
+  if(!strcmp(CurGame->shortname, "pce"))
+  {
+   OpBreakpoints = std::string("0");
+   UpdateBreakpoints(OpBreakpoints, BPOINT_OP);
+  }
+
 }
 
 void Debugger_Kill(void)
