@@ -41,6 +41,9 @@
 
 #include "driver.h"
 
+// extensions
+#include "netplay-text.cpp"
+
 int MDFNnetplay=0;
 
 static std::map<std::string, uint32> PlayersList;
@@ -680,6 +683,9 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
 
    case MDFNNPCMD_TEXT:
 			{
+       bool display = true;
+       const char* nick = NULL;
+       const char* msg = NULL;
 			 static const uint32 MaxLength = 2000;
 			 char neobuf[MaxLength + 1];
 			 const uint32 totallen = raw_len;
@@ -709,23 +715,30 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
 
 			 if(nicklen)
 			 {
-			  memmove(neobuf, neobuf + 4, nicklen);
-			  neobuf[nicklen] = 0;
+        memmove(neobuf, neobuf + 4, nicklen);
+        neobuf[nicklen] = 0;
 
-			  if(OurNick && !strcasecmp(OurNick, neobuf))
+        nick = neobuf;
+        msg = &neobuf[4 + nicklen];
+
+			  if(OurNick && !strcasecmp(OurNick, nick))
 			  {
-                           trio_asprintf(&textbuf, "> %s", &neobuf[4 + nicklen]);
+                           trio_asprintf(&textbuf, "> %s", msg);
 			   NetEcho = true;
 			  }
 			  else
-			   trio_asprintf(&textbuf, "<%s> %s", neobuf, &neobuf[4 + nicklen]);
+			   trio_asprintf(&textbuf, "<%s> %s", nick, msg);
 			 }
 		         else
 			 {
-			  trio_asprintf(&textbuf, "* %s", &neobuf[4]);
+        msg = &neobuf[4];
+			  trio_asprintf(&textbuf, "* %s", msg);
 			 }
-                         MDFND_NetplayText(textbuf, NetEcho);
-			 free(textbuf);
+       ProcessText(nick, msg, display);
+       if (display)
+        MDFND_NetplayText(textbuf, NetEcho);
+			 if (textbuf)
+        free(textbuf);
 			}
 			break;
 
