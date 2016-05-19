@@ -291,16 +291,6 @@ uint32 PCE_PSG::GetRegister(const unsigned int id, char *special, const uint32 s
  return(value);
 }
 
-void PCE_PSG::MuteChannel(uint8 chan)
-{
-  uint32 val = 0;
-  if (channel_mute & (1<<chan))
-    val = 0xFF;
-  channel[chan].balance = val & 0xFF;
-  //SetRegister(PSG_GSREG_CH0_BALANCE | (channel << 8), 0);
-  channel_mute ^= (1<<chan);
-}
-
 
 void PCE_PSG::SetRegister(const unsigned int id, const uint32 value)
 {
@@ -343,8 +333,7 @@ void PCE_PSG::SetRegister(const unsigned int id, const uint32 value)
 	break;
 
   case PSG_GSREG_CH0_BALANCE:
-  if (!(channel_mute & (1<<ch)))
-	 channel[ch].balance = value & 0xFF;
+	channel[ch].balance = value & 0xFF;
 	break;
 
   case PSG_GSREG_CH0_WINDEX:
@@ -445,8 +434,6 @@ PCE_PSG::PCE_PSG(int32* hr_l, int32* hr_r, int want_revision)
 	 channel[ch].lastts = 0;
 	}
 
-  channel_mute = 0;
-
 	SetVolume(1.0);	// Will build dbtable in the process.
 	Power(0);
 }
@@ -544,8 +531,7 @@ void PCE_PSG::Write(int32 timestamp, uint8 A, uint8 V)
 
         case 0x05: /* Channel balance */
 	    if(select > 5) return; // no more than 6 channels, silly game.
-            if (!(channel_mute & (1<<select)))
-              ch->balance = V;
+            ch->balance = V;
 
 	    vol_pending = true;
             break;

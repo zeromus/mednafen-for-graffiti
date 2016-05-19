@@ -824,7 +824,7 @@ int MemDebugger::Event(const SDL_Event *event)
         {
          myprompt->Event(event);
         }
-	else if(InEditMode && InTextArea && keysym != SDLK_TAB && keysym != SDLK_v && keysym != SDLK_UP && keysym != SDLK_DOWN && keysym != SDLK_LEFT
+	else if(InEditMode && InTextArea && keysym != SDLK_TAB && keysym != SDLK_INSERT && keysym != SDLK_UP && keysym != SDLK_DOWN && keysym != SDLK_LEFT
 	 && keysym != SDLK_RIGHT && (event->key.keysym.unicode >= 0x20))
 	{
 	 uint8 to_write[16];
@@ -953,7 +953,7 @@ int MemDebugger::Event(const SDL_Event *event)
 		}
 		break;
 
-	 case SDLK_v:
+	 case SDLK_INSERT:
 		InEditMode = !InEditMode;
 		LowNib = FALSE;
 		break;

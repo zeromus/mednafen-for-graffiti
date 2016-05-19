@@ -129,8 +129,6 @@ class PCE_PSG
         PCE_PSG(int32* hr_l, int32* hr_r, int want_revision);
         ~PCE_PSG();
 
-        void MuteChannel(const uint8 chan);
-
 	void StateAction(StateMem *sm, const unsigned load, const bool data_only);
 
         void Power(const int32 timestamp);
@@ -168,7 +166,6 @@ class PCE_PSG
 	void RecalcNoiseFreqCache(int chnum);
 	void RunChannel(int chc, int32 timestamp, bool LFO_On);
 
-        uint8 channel_mute;         /* bit flags */
         uint8 select;               /* Selected channel (0-5) */
         uint8 globalbalance;        /* Global sound balance */
         uint8 lfofreq;              /* LFO frequency */

@@ -276,7 +276,8 @@ static void UpdateBreakpoints(void)
  UpdateBreakpoints(IOReadBreakpoints, BPOINT_IO_READ);
  UpdateBreakpoints(IOWriteBreakpoints, BPOINT_IO_WRITE);
  UpdateBreakpoints(AuxReadBreakpoints, BPOINT_AUX_READ);
- UpdateBreakpoints(AuxReadBreakpoints, BPOINT_AUX_READ);
+ UpdateBreakpoints(AuxWriteBreakpoints, BPOINT_AUX_WRITE);
+ UpdateBreakpoints(OpBreakpoints, BPOINT_OP);
 }
 
 static unsigned RegsPosX;
@@ -608,7 +609,7 @@ class DebuggerPrompt : public HappyPrompt
 
 		    unsigned int endpc;
 		    char tmpfn[256];
-		    int num = trio_sscanf(tmp_c_str, "%.255s %x", tmpfn, &endpc);
+		    int num = trio_sscanf(tmp_c_str, "%255s %x", tmpfn, &endpc);
 		    if(num >= 1)
 		    {
 		     if((TraceLog = fopen(tmpfn, "ab")))
@@ -884,13 +885,17 @@ void Debugger_GT_Draw(void)
   //printf("%08x %08x\n", A, DisAddr);
   CurGame->Debugger->Disassemble(A, ResyncAddr, dis_text_buf); // A is passed by reference to Disassemble()
 
-  const uint64 compare_A = (A < lastA) ? ((1ULL << CurGame->Debugger->LogAddrBits) + A) : A;
-
   NewEntry.A = lastA;
   NewEntry.text = std::string(dis_text_buf);
   NewEntry.COffs = 0xFFFFFFFF;
 
-  if(compare_A > ResyncAddr && lastA < ResyncAddr) // Err, oops, resynch if necessary
+  const uint64 a_m_la  = (A - lastA) & ((1ULL << CurGame->Debugger->LogAddrBits) - 1);
+  const uint64 ra_m_la = (ResyncAddr - lastA) & ((1ULL << CurGame->Debugger->LogAddrBits) - 1);
+
+  //printf("A=%16llx lastA=%16llx a_m_la=%16llx ra_m_la=%16llx RA=%16llx\n", (unsigned long long)A, (unsigned long long)lastA, a_m_la, ra_m_la, (unsigned long long)ResyncAddr);
+
+  // Resynch if necessary
+  if(ra_m_la != 0 && a_m_la > ra_m_la)
   {
    A = ResyncAddr;
    NewEntry.ForcedResync = true;
@@ -898,7 +903,7 @@ void Debugger_GT_Draw(void)
   else
    NewEntry.ForcedResync = false;
 
-  DisBytes -= compare_A - lastA;
+  DisBytes -= a_m_la;
 
 
   {
@@ -1486,29 +1491,6 @@ void Debugger_GT_Event(const SDL_Event *event)
      default: break;
     }
    }
-   else if(event->key.keysym.mod & KMOD_SHIFT)
-   {
-    switch(event->key.keysym.sym)
-    {
-     if (CurGame->Debugger->MuteChannel)
-     {
-      case SDLK_1: CurGame->Debugger->MuteChannel(0);
-       break;
-      case SDLK_2: CurGame->Debugger->MuteChannel(1);
-       break;
-      case SDLK_3: CurGame->Debugger->MuteChannel(2);
-       break;
-      case SDLK_4: CurGame->Debugger->MuteChannel(3);
-       break;
-      case SDLK_5: CurGame->Debugger->MuteChannel(4);
-       break;
-      case SDLK_6: CurGame->Debugger->MuteChannel(5);
-       break;
-     }
-
-     default: break;
-    }
-   }
   }
 
   if(WhichMode == 1)
@@ -1906,14 +1888,6 @@ void Debugger_Init(void)
 	 Debugger_GT_Toggle();
 	 Debugger_GT_ForceSteppingMode();
 	}
-
-  // Add BRK opcode breakpoint automatically if using PCE module
-  if(!strcmp(CurGame->shortname, "pce"))
-  {
-   OpBreakpoints = std::string("0");
-   UpdateBreakpoints(OpBreakpoints, BPOINT_OP);
-  }
-
 }
 
 void Debugger_Kill(void)
