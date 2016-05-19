@@ -466,7 +466,7 @@ static void MDFNI_NetplayIntegrity(void)
  }
 }
 #endif
-static void MDFNI_NetplayText(const char *text)
+void MDFNI_NetplayText(const char *text)
 {
  try
  {

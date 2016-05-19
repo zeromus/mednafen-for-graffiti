@@ -6,6 +6,8 @@ void MDFNI_NetplayLine(const char *text, bool &inputable, bool &viewable);
 /* Call when network play needs to stop. */
 void MDFNI_NetplayStop(void);
 
+void MDFNI_NetplayText(const char *text);
+
 /* Note:  YOU MUST NOT CALL ANY MDFNI_* FUNCTIONS WHILE IN MDFND_SendData() or
    MDFND_RecvData().
 */
