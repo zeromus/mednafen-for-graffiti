@@ -44,6 +44,8 @@
 // extensions
 #include "netplay-text.cpp"
 
+TextCommandRegistrar TextCommandsRegistrar;
+
 int MDFNnetplay=0;
 
 static std::map<std::string, uint32> PlayersList;
@@ -734,7 +736,7 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
         msg = &neobuf[4];
 			  trio_asprintf(&textbuf, "* %s", msg);
 			 }
-       ProcessText(nick, msg, display);
+       TextCommandsRegistrar.Process(nick, msg, display);
        if (display)
         MDFND_NetplayText(textbuf, NetEcho);
 			 if (textbuf)

@@ -1,38 +1,63 @@
-static bool Draw(const char *nick, const char *msg, bool &display);
-static bool Draw2(const char *nick, const char *msg, bool &display);
-bool (*FunctionPointers[])(const char *nick, const char *msg, bool &display) = {
-  Draw,
-  Draw2,
-  NULL
-};
-/* Call registered Text handlers
-** They can modify whether command should be printed by setting display to false
-*/
-static void ProcessText(const char *nick, const char *msg, bool &display)
+struct TextCommand
 {
-  // iterate through plugins until a match has been found (returns true)
-  for (int i=0; FunctionPointers[i] != NULL; i++)
-    if (FunctionPointers[i](nick, msg, display))
-      return;
-}
+  using id_t = uint16_t;
 
-static bool Draw(const char *nick, const char *msg, bool &display)
-{
-  printf("IN DRAW\n");
-
-  // check for command sequence
-  const uint16_t CmdSeq = 0x1dea;
-  if (*(uint16_t *)msg == CmdSeq)
-  {
-    printf ("CMD MATCH!\n");
-    display = false;
+  TextCommand() {
+    id = ++ID;
   }
-  
-  return false;
-}
 
-static bool Draw2(const char *nick, const char *msg, bool &display)
+  void activate() { active = true; }
+  void deactivate() { active = false; };
+  bool is_active() { return active; }
+
+  void send() {
+    MDFNI_NetplayText(std::string(message));
+  }
+  virtual bool Process(const char *nick, const char *msg, bool &display)=0;
+  id_t id;
+  bool active=true;
+  std::string message;
+
+  static id_t ID;
+};
+
+TextCommand::id_t TextCommand::ID = 0;
+
+struct DrawCommand : public TextCommand
 {
-  printf("IN DRAW2\n");
-  return true;
-}
+  bool Process(const char *nick, const char *msg, bool &display)
+  {
+    printf("IN DRAW\n");
+
+    // check for command sequence
+    if (*(id_t *)msg == id)
+    {
+      printf ("CMD MATCH!\n");
+      display = false;
+    }
+
+    return false;
+  }
+};
+
+struct TextCommandRegistrar
+{
+  //int Register(const TextCommand &tc);
+
+  std::vector<TextCommand *> commands = {
+    new DrawCommand
+  };
+
+  /* Call registered Text handlers
+  ** They can modify whether command should be printed by setting display to false
+  */
+  void Process(const char *nick, const char *msg, bool &display)
+  {
+    // iterate through plugins until a match has been found (returns true)
+    for (auto& cmd : commands)
+    {
+      if (cmd->Process(nick, msg, display))
+        return;
+    }
+  }
+};
