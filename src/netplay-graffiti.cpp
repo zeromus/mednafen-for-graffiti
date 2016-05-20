@@ -2,6 +2,7 @@
 
 Graffiti::Graffiti(MDFN_Surface *newcanvas) : canvas{newcanvas}
 {
+  canvas->Fill(0, 0, 0, 0);
   // fprintf(stderr, "GRAFFITI\n");
   // uint32 pitch32 = CurGame->fb_width; 
   // MDFN_PixelFormat nf(MDFN_COLORSPACE_RGB, 0, 8, 16, 24);
@@ -13,19 +14,33 @@ void Graffiti::Draw(MDFN_Surface *target, const int xpos, const int ypos)
   if(!active)
     return;
 
-  const uint32 bg_color = target->MakeColor(0, 0, 0);
+  const uint32 bg_color = target->MakeColor(red, green, blue);
   const uint32 text_color = target->MakeColor(red, green, blue);
-  //char virtfps[32], drawnfps[32], blitfps[32];
 
-  //CalcFramerates(virtfps, drawnfps, blitfps, 32);
+  // iterate through the canvas
+  // any pixel sets that aren't 00, copy over to target
+  uint32 *canvas_pixels = (uint32*)canvas->pixels;
+  uint32 *target_pixels = (uint32*)target->pixels;
 
-  printf("x = %d, y = %d\n", x, y);
-  MDFN_DrawFillRect(target, x, y, 5, 5, bg_color);
+  for(int32 i = 0; i < target->pitchinpix * target->h; i++)
+    if(canvas_pixels[i])
+      target_pixels[i] = canvas_pixels[i];
 
-  // DrawTextTrans(target->pixels + xpos + ypos * target->pitch32, target->pitch32 << 2, box_width, virtfps, text_color, FALSE, TRUE);
-  // DrawTextTrans(target->pixels + xpos + (ypos + 7) * target->pitch32, target->pitch32 << 2, box_width, drawnfps, text_color, FALSE, TRUE);
-  // DrawTextTrans(target->pixels + xpos + (ypos + 7 * 2) * target->pitch32, target->pitch32 << 2, box_width, blitfps, text_color, FALSE, TRUE);
+ // if(w < 1 || h < 1)
+ //  return;
 
+ // Replace these width and height checks with assert()s in the future.
+ // if(((uint64)x + w) > (uint32)canvas->w)
+ // {
+ //  fprintf(stderr, "Rect xw bug!\n");
+ //  return;
+ // }
+
+ // if(((uint64)y + h) > (uint32)canvas->h)
+ // {
+ //  fprintf(stderr, "Rect yh bug!\n");
+ //  return;
+ // }
 }
 
 void Graffiti::Input_Event(const SDL_Event &event)
@@ -37,9 +52,9 @@ void Graffiti::Input_Event(const SDL_Event &event)
     {
       printf ("painting TRUE\n");
       painting = true;
-      // red = (rand() % 7 + 1) * 32;
-      // green = (rand() % 7 + 1) * 32;
-      // blue = (rand() % 7 + 1) * 32;
+      red = (rand() % 7 + 1) * 32;
+      green = (rand() % 7 + 1) * 32;
+      blue = (rand() % 7 + 1) * 32;
       x = event.button.x; y = event.button.y;
       Paint(event.button.x, event.button.y, red, green, blue);
     }
@@ -85,11 +100,17 @@ bool Graffiti::Process(const char *nick, const char *msg, bool &display)
 }
 
 /*
-paint: Utility function that paints colors to a surface.
+paint: Utility function that paints colors to a canvas.
 The location to paint is given by x and y, the color to paint is
 a mixture of red, green, and blue values in the range 0 to 255.
 */
 void Graffiti::Paint(int x, int y, uint8_t red, uint8_t green, uint8_t blue)
 {
+  if(!active)
+    return;
+
+  const uint32 bg_color = canvas->MakeColor(red, green, blue);
   
+  // printf("x = %d, y = %d\n", x, y);
+  MDFN_DrawFillRect(canvas, x, y, 2, 2, bg_color);
 }
