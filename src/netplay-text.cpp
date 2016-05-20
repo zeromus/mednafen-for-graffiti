@@ -1,63 +1,61 @@
-struct TextCommand
+#include "netplay-text.h"
+
+TextCommand::TextCommand()
 {
-  using id_t = uint16_t;
+  TextCommand::Registrar.Register(this);
+}
 
-  TextCommand() {
-    id = ++ID;
-  }
+TextCommand::magic_t TextCommand::Magic() { return magic; }
+void TextCommand::Activate() { active = true; }
+void TextCommand::Deactivate() { active = false; };
+bool TextCommand::Active() { return active; }
+void TextCommand::Send(const std::string& message) {
+  std::string msg = magic2str(Registration::SuperMagic) + magic2str(magic) + message;
+  MDFNI_NetplayText(msg.c_str());
+}
 
-  void activate() { active = true; }
-  void deactivate() { active = false; };
-  bool is_active() { return active; }
-
-  void send() {
-    MDFNI_NetplayText(std::string(message));
-  }
-  virtual bool Process(const char *nick, const char *msg, bool &display)=0;
-  id_t id;
-  bool active=true;
-  std::string message;
-
-  static id_t ID;
-};
-
-TextCommand::id_t TextCommand::ID = 0;
-
-struct DrawCommand : public TextCommand
+static inline bool magic_valid(const char *msg, TextCommand::magic_t magic)
 {
-  bool Process(const char *nick, const char *msg, bool &display)
+  return *reinterpret_cast<const TextCommand::magic_t *>(msg) == magic;
+}
+
+bool TextCommand::Registration::SuperMagicValid(const char *msg)
+{
+  return magic_valid(msg, SuperMagic);
+}
+
+bool TextCommand::MagicValid(const char* msg)
+{
+  return magic_valid(msg, magic);
+}
+std::string TextCommand::magic2str(magic_t magic)
+{
+  std::string s;
+  const char *m = reinterpret_cast<const char *>(&magic);
+  s += *(m++);
+  s += *m;
+  return s;
+}
+
+int TextCommand::Registration::Register(TextCommand* tc)
+{
+  commands.push_back(tc);
+  // assert all magic are unique
+  return 0;
+}
+
+void TextCommand::Registration::Process(const char *nick, const char *msg, bool &display)
+{
+  if (!SuperMagicValid(msg))
+    return;
+  // iterate through plugins until a match has been found (returns true)
+  for (auto& cmd : commands)
   {
-    printf("IN DRAW\n");
-
-    // check for command sequence
-    if (*(id_t *)msg == id)
-    {
-      printf ("CMD MATCH!\n");
-      display = false;
-    }
-
-    return false;
+    if (!cmd->MagicValid(&msg[sizeof(magic_t)]))
+      continue;
+    if (cmd->Process(nick, &msg[sizeof(magic_t)*2], display))
+      return;
   }
-};
+}
 
-struct TextCommandRegistrar
-{
-  //int Register(const TextCommand &tc);
-
-  std::vector<TextCommand *> commands = {
-    new DrawCommand
-  };
-
-  /* Call registered Text handlers
-  ** They can modify whether command should be printed by setting display to false
-  */
-  void Process(const char *nick, const char *msg, bool &display)
-  {
-    // iterate through plugins until a match has been found (returns true)
-    for (auto& cmd : commands)
-    {
-      if (cmd->Process(nick, msg, display))
-        return;
-    }
-  }
-};
+TextCommand::Registration TextCommand::Registrar {};

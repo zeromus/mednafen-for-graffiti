@@ -36,6 +36,9 @@
 
 #include <math.h>
 
+#include "../netplay-graffiti.h"
+extern Graffiti graffiti;
+
 extern JoystickManager *joy_manager;
 
 bool RewindState = true;
@@ -809,7 +812,7 @@ void Input_Event(const SDL_Event *event)
 	if(event->button.state == SDL_PRESSED)
 	{
    printf("MOUSE BUTTON DOWN\n");
-   MDFNI_NetplayText("\xea\x1dMB DOWN");
+   graffiti.Send("TEST");
 	 MouseState.button |= 1 << (event->button.button - 1);
 	 MouseState.button_realstate |= 1 << (event->button.button - 1);
 	}

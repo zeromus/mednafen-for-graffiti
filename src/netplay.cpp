@@ -43,8 +43,9 @@
 
 // extensions
 #include "netplay-text.cpp"
+#include "netplay-graffiti.cpp"
 
-TextCommandRegistrar TextCommandsRegistrar;
+Graffiti graffiti;
 
 int MDFNnetplay=0;
 
@@ -736,7 +737,8 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
         msg = &neobuf[4];
 			  trio_asprintf(&textbuf, "* %s", msg);
 			 }
-       TextCommandsRegistrar.Process(nick, msg, display);
+       
+       TextCommand::Registrar.Process(nick, msg, display);
        if (display)
         MDFND_NetplayText(textbuf, NetEcho);
 			 if (textbuf)
