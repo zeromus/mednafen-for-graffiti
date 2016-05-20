@@ -45,7 +45,7 @@
 #include "netplay-text.cpp"
 #include "netplay-graffiti.cpp"
 
-Graffiti graffiti;
+extern Graffiti *graffiti;
 
 int MDFNnetplay=0;
 

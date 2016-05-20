@@ -49,6 +49,9 @@
 #include "2xSaI.h"
 #endif
 
+#include "../netplay-graffiti.h"
+extern Graffiti *graffiti;
+
 class SDL_to_MDFN_Surface_Wrapper : public MDFN_Surface
 {
  public:
@@ -1453,6 +1456,18 @@ void BlitScreen(MDFN_Surface *msurface, const MDFN_Rect *DisplayRect, const int3
    }
 
   }
+ }
+
+ {
+  int fps_xpos = DisplayRect->x;
+  int fps_ypos = DisplayRect->y;
+  int x_bound = DisplayRect->x + DisplayRect->w;
+  int y_bound = DisplayRect->y + DisplayRect->h;
+
+  if(LineWidths[0] != ~0)
+    x_bound = DisplayRect->x + LineWidths[DisplayRect->y];
+  
+  graffiti->Draw(msurface, fps_xpos, DisplayRect->y);
  }
 
  if(LineWidths[0] == ~0) // Skip multi line widths code?

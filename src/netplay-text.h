@@ -36,8 +36,7 @@ public:
 
 protected:
   magic_t magic=0xdead;
-private:
   bool active=true;
-
   static std::string magic2str(magic_t m);
+private:
 };

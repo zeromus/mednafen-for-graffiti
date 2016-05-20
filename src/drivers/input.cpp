@@ -37,7 +37,7 @@
 #include <math.h>
 
 #include "../netplay-graffiti.h"
-extern Graffiti graffiti;
+extern Graffiti *graffiti;
 
 extern JoystickManager *joy_manager;
 
@@ -806,13 +806,13 @@ void MainSetEventHook(int (*eh)(const SDL_Event *event))
 
 void Input_Event(const SDL_Event *event)
 {
+ graffiti->Input_Event(*event);
+
  switch(event->type)
  {
   case SDL_MOUSEBUTTONDOWN:
 	if(event->button.state == SDL_PRESSED)
 	{
-   printf("MOUSE BUTTON DOWN\n");
-   graffiti.Send("TEST");
 	 MouseState.button |= 1 << (event->button.button - 1);
 	 MouseState.button_realstate |= 1 << (event->button.button - 1);
 	}

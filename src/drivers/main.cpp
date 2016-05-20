@@ -60,6 +60,9 @@
 #include <mednafen/qtrecord.h>
 #include <math.h>
 
+#include "../netplay-graffiti.h"
+Graffiti *graffiti;
+
 JoystickManager *joy_manager = NULL;
 bool MDFNDHaveFocus;
 static bool RemoteOn = FALSE;
@@ -1819,6 +1822,7 @@ for(int zgi = 1; zgi < argc; zgi++)// start game load test loop
          VTBuffer[1] = new MDFN_Surface(NULL, CurGame->fb_width, CurGame->fb_height, pitch32, nf);
          VTLineWidths[0] = (int32 *)calloc(CurGame->fb_height, sizeof(int32));
          VTLineWidths[1] = (int32 *)calloc(CurGame->fb_height, sizeof(int32));
+    graffiti = new Graffiti(new MDFN_Surface(NULL, CurGame->fb_width, CurGame->fb_height, pitch32, nf));
 
          for(int i = 0; i < 2; i++)
 	 {
