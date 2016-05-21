@@ -86,13 +86,21 @@ void Graffiti::Input_Event(const SDL_Event &event)
 //   draw_command.Send(msg);
 // }
 
-bool Graffiti::Process(const char *nick, const char *msg, bool &display)
+bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &display)
 {
   // printf("0x%04X\n", magic);
   printf("IN DRAW\n");
-  // for (int i=0; msg[i]; i++)
-  //   printf("0x%2x ", static_cast<unsigned char>(msg[i]));
-  printf("%s\n", msg);
+  // for (int i=0; i < len; i++)
+  //   printf("0x%02x ", static_cast<unsigned char>(msg[i]));
+  // printf("%s\n", msg);
+  LoadPacket(msg, len);
+
+  uint32 x,y,w,h,bg_color;
+  *this >> x >> y >> w >> h >> bg_color;
+  std::cout << "x: " << x << "y: " << y << "w: " << w << "h: " << h << "bg: " << bg_color << std::endl;
+
+  if (strcasecmp(nick, OurNick))
+    MDFN_DrawFillRect(canvas, x, y, w, h, bg_color);
 
   display = false;
 
@@ -112,5 +120,7 @@ void Graffiti::Paint(int x, int y, uint8_t red, uint8_t green, uint8_t blue)
   const uint32 bg_color = canvas->MakeColor(red, green, blue);
   
   // printf("x = %d, y = %d\n", x, y);
-  MDFN_DrawFillRect(canvas, x, y, 2, 2, bg_color);
+  MDFN_DrawFillRect(canvas, x, y, 5, 5, bg_color);
+  *this << x << y << 5 << 5 << bg_color;
+  Send();
 }

@@ -41,12 +41,6 @@
 
 #include "driver.h"
 
-// extensions
-#include "netplay-text.cpp"
-#include "netplay-graffiti.cpp"
-
-extern Graffiti *graffiti;
-
 int MDFNnetplay=0;
 
 static std::map<std::string, uint32> PlayersList;
@@ -65,6 +59,11 @@ static bool StateLoaded;	// Set to true/false in Netplay_Update() call paths, us
 
 static std::unique_ptr<uint8[]> incoming_buffer;	// TotalInputStateSize + 1
 static std::unique_ptr<uint8[]> outgoing_buffer;	// 1 + LocalInputStateSize + 4
+
+// extensions
+#include "netplay-text.cpp"
+#include "netplay-graffiti.cpp"
+extern Graffiti *graffiti;
 
 static void RebuildPortVtoVMap(const uint32 PortDevIdx[])
 {
@@ -490,6 +489,22 @@ void MDFNI_NetplayText(const char *text)
  }
 }
 
+// Binary messages over TextCommand channel (features nick author)
+// it probably doesn't "HAVE" to be over TextCommand Channel, but whatever!
+void MDFNI_NetplayRaw(const void *buf, uint32 len)
+{
+ try
+ {
+  if(!Joined) return;
+
+  SendCommand(MDFNNPCMD_TEXT, len, buf);
+ }
+ catch(std::exception &e)
+ {
+  NetError("%s", e.what());
+ }
+}
+
 static void MDFNI_NetplayChangeNick(const char* newnick)
 {
  try
@@ -738,7 +753,7 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
 			  trio_asprintf(&textbuf, "* %s", msg);
 			 }
        
-       TextCommand::Registrar.Process(nick, msg, display);
+       TextCommand::Registrar.Process(nick, msg, totallen - (4 + nicklen), display);
        if (display)
         MDFND_NetplayText(textbuf, NetEcho);
 			 if (textbuf)
