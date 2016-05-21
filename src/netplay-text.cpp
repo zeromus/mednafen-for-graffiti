@@ -61,8 +61,8 @@ int TextCommand::Registration::Register(TextCommand* tc)
 void TextCommand::Registration::Process(
   const char *nick, const char *msg, uint32 len, bool &display)
 {
-  for (int i=0; i < len; i++)
-    printf("0x%02x ", static_cast<unsigned char>(msg[i]));
+  // for (int i=0; i < len; i++)
+  //   printf("0x%02x ", static_cast<unsigned char>(msg[i]));
 
   if (!SuperMagicValid(msg))
     return;
