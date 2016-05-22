@@ -1091,6 +1091,8 @@ void Video_Init(MDFNGI *gi)
    SDL_Flip(screen);
  }
 
+ graffiti->SetScale(_video.xscale, _video.yscale);
+
  MarkNeedBBClear();
 }
 

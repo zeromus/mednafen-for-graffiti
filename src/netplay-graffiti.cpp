@@ -117,6 +117,12 @@ void Graffiti::Paint(int x, int y, uint8_t red, uint8_t green, uint8_t blue)
   if(!active)
     return;
 
+  printf("x: %d, y: %d\n", x, y);
+  printf("sx: %f, ox: %f\n", CurGame->mouse_scale_x, CurGame->mouse_offs_x);
+  printf("sy: %f, oy: %f\n", CurGame->mouse_scale_y, CurGame->mouse_offs_y);
+  x = x / xscale; //CurGame->mouse_scale_x - CurGame->mouse_offs_x;
+  y = y / yscale; //CurGame->mouse_scale_y - CurGame->mouse_offs_y;
+
   const uint32 bg_color = canvas->MakeColor(red, green, blue);
   
   // printf("x = %d, y = %d\n", x, y);

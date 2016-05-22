@@ -156,6 +156,8 @@ void MDFNI_NetplayStop(void)
 	 outgoing_buffer.reset(nullptr);
 	}
 	else puts("Check your code!");
+
+  graffiti->Disable();
 }
 
 struct login_data_t
@@ -305,6 +307,8 @@ int NetplayStart(const uint32 PortDeviceCache[16], const uint32 PortDataLenCache
 
   if(MDFNMOV_IsPlaying())		/* Recording's ok during netplay, playback is not. */
    MDFNMOV_Stop();
+
+  graffiti->Enable();
  }
  catch(std::exception &e)
  {
