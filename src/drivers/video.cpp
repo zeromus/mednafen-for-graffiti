@@ -1469,7 +1469,7 @@ void BlitScreen(MDFN_Surface *msurface, const MDFN_Rect *DisplayRect, const int3
   if(LineWidths[0] != ~0)
     x_bound = DisplayRect->x + LineWidths[DisplayRect->y];
   
-  graffiti->Draw(msurface, fps_xpos, DisplayRect->y);
+  graffiti->Blit(msurface, fps_xpos, DisplayRect->y);
  }
 
  if(LineWidths[0] == ~0) // Skip multi line widths code?

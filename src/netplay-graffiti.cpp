@@ -1,5 +1,35 @@
 #include "netplay-graffiti.h"
 
+static bool CC_graffiti(const char *arg)
+{
+  extern Graffiti *graffiti;
+
+  if (!strcmp("", arg))
+    graffiti->Toggle();
+
+  if (!strcmp("on", arg))
+  {
+    graffiti->Enable();
+  }
+  else if (!strcmp("off", arg))
+  {
+    graffiti->Disable();
+  }
+  else if (!strcmp("clear", arg))
+  {
+    graffiti->Clear();
+  }
+
+  return true;  // keep console open
+}
+
+// TODO: Write proper help stanza
+const CommandEntry GraffitiCommand {
+  "/g", CC_graffiti,
+  gettext_noop(""),
+  "Graffiti"
+};
+
 Graffiti::Graffiti(MDFN_Surface *newcanvas) : canvas{newcanvas}
 {
   canvas->Fill(0, 0, 0, 0);
@@ -8,8 +38,32 @@ Graffiti::Graffiti(MDFN_Surface *newcanvas) : canvas{newcanvas}
   // MDFN_PixelFormat nf(MDFN_COLORSPACE_RGB, 0, 8, 16, 24);
   // canvas = new MDFN_Surface(NULL, CurGame->fb_width, CurGame->fb_height, pitch32, nf);
 }
+///////////////
+void Graffiti::Enable(bool e)
+{
+  SDL_ShowCursor(e); enabled = e;
+}
 
-void Graffiti::Draw(MDFN_Surface *target, const int xpos, const int ypos)
+void Graffiti::Disable()
+{
+  SDL_ShowCursor(0); enabled = false;
+}
+
+void Graffiti::Toggle()
+{
+  Enable(!enabled);
+}
+////////////////
+void Graffiti::Clear()
+{
+  if (canvas)
+  {
+    canvas->Fill(0,0,0,0);
+    // TODO: Tell your netplay friend(s) to do the same!
+  }
+}
+
+void Graffiti::Blit(MDFN_Surface *target, const int xpos, const int ypos)
 {
   if(!active)
     return;
@@ -52,10 +106,9 @@ void Graffiti::Input_Event(const SDL_Event &event)
     {
       printf ("painting TRUE\n");
       painting = true;
-      red = (rand() % 7 + 1) * 32;
-      green = (rand() % 7 + 1) * 32;
-      blue = (rand() % 7 + 1) * 32;
-      x = event.button.x; y = event.button.y;
+      red = (rand() % 8) * 32;
+      green = (rand() % 8) * 32;
+      blue = (rand() % 8) * 32;
       Paint(event.button.x, event.button.y, red, green, blue);
     }
     break;
@@ -72,7 +125,6 @@ void Graffiti::Input_Event(const SDL_Event &event)
     if(painting) {
       // Continue painting
       printf ("painting MOTION\n");
-      x = event.motion.x; y = event.motion.y;
       Paint(event.motion.x, event.motion.y, red, green, blue);
     }
     break;
@@ -112,7 +164,7 @@ paint: Utility function that paints colors to a canvas.
 The location to paint is given by x and y, the color to paint is
 a mixture of red, green, and blue values in the range 0 to 255.
 */
-void Graffiti::Paint(int x, int y, uint8_t red, uint8_t green, uint8_t blue)
+void Graffiti::Paint(int x, int y, uint8 red, uint8 green, uint8 blue)
 {
   if(!active)
     return;

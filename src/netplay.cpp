@@ -60,6 +60,13 @@ static bool StateLoaded;	// Set to true/false in Netplay_Update() call paths, us
 static std::unique_ptr<uint8[]> incoming_buffer;	// TotalInputStateSize + 1
 static std::unique_ptr<uint8[]> outgoing_buffer;	// 1 + LocalInputStateSize + 4
 
+struct CommandEntry
+{
+ const char *name;
+ bool (*func)(const char* arg);
+ const char *help_args;
+ const char *help_desc;
+};
 // extensions
 #include "netplay-text.cpp"
 #include "netplay-graffiti.cpp"
@@ -1162,14 +1169,6 @@ void Netplay_PostProcess(const uint32 PortDevIdx[], uint8* const PortData[], con
 //
 //
 
-struct CommandEntry
-{
- const char *name;
- bool (*func)(const char* arg);
- const char *help_args;
- const char *help_desc;
-};
-
 static bool CC_server(const char *arg);
 static bool CC_quit(const char *arg);
 static bool CC_help(const char *arg);
@@ -1207,6 +1206,9 @@ static CommandEntry ConsoleCommands[]   =
 
  { "/ping", CC_ping,		"", "Pings the server." },
 
+#ifdef __MDFN_NETPLAY_GRAFFITI_H
+ GraffitiCommand,
+#endif
  //{ "/integrity", CC_integrity,	"", "Starts netplay integrity check sequence." },
 
  { NULL, NULL },

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __MDFN_NETPLAY_GRAFFITI_H
+#define __MDFN_NETPLAY_GRAFFITI_H
 #include "netplay-text.h"
 #include "drivers/main.h"
 
@@ -8,22 +9,21 @@ class Graffiti : public TextCommand
 public:
   Graffiti(MDFN_Surface *newcanvas);
   ~Graffiti() { delete canvas; canvas = nullptr; }
-  void Enable() { SDL_ShowCursor(1); }
-  void Disable() { SDL_ShowCursor(0); }
-  //void Send(const std::string &msg = "");
+  void Enable(bool e=true);
+  void Disable();
+  void Toggle();
   void SetScale(const scale_t& x, const scale_t& y) { xscale = x; yscale = y; }
   void Input_Event(const SDL_Event &event);
-  void Clear() { if (canvas) canvas->Fill(0,0,0,0); }
-  void Draw(MDFN_Surface *target, const int xpos, const int ypos);
-
+  void Clear();
+  void Blit(MDFN_Surface *target, const int xpos, const int ypos);
 private:
-  void Paint(int x, int y, Uint8 red, Uint8 green, Uint8 blue);
+  void Paint(int x, int y, uint8 red, uint8 green, uint8 blue);
   bool Process(const char *nick, const char *msg, uint32 len, bool &display);
-  MDFN_Surface *canvas {nullptr};  // I think that's the right datatype..
+  MDFN_Surface *canvas {nullptr};
   bool painting {false};
-  uint8_t red, green, blue;
-  int x{0}, y{0};
+  uint8 red, green, blue;
   scale_t xscale{1}, yscale{1};
+  bool enabled {false};
 };
 
-
+#endif
