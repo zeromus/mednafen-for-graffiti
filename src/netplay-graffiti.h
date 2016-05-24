@@ -9,6 +9,8 @@ Problematic Emulators
   - PCE (needs mouse scroll/offset setting impl!)
 
 Unlisted emulators haven't been tested yet
+
+Bresenham Line algo from http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C
 */
 #ifndef __MDFN_NETPLAY_GRAFFITI_H
 #define __MDFN_NETPLAY_GRAFFITI_H
@@ -53,6 +55,7 @@ public:
 private:
   bool Process(const char *nick, const char *msg, uint32 len, bool &display);
   void Paint(const int& x, const int& y);
+  void Line(int& x0, int& y0,const int& x1,const int& y1);
 
   bool painting {false};
 
@@ -65,6 +68,7 @@ private:
     MDFN_Surface *canvas {nullptr};
     uint8 red, green, blue;
     uint32 width {5}, height {5};
+    int x0 {0}, y0 {0};
     scale_t xscale {1}, yscale {1};
   } view;
 };

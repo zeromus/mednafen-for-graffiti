@@ -177,6 +177,8 @@ void Graffiti::Input_Event(const SDL_Event &event)
       view.green = (rand() % 8) * 32;
       view.blue = (rand() % 8) * 32;
       Paint(event.button.x, event.button.y);
+      view.x0 = event.button.x;
+      view.y0 = event.button.y;
     }
     break;
 
@@ -192,12 +194,70 @@ void Graffiti::Input_Event(const SDL_Event &event)
     if(painting) {
       // Continue painting
       printf ("painting MOTION\n");
-      Paint(event.motion.x, event.motion.y);
+      Line(view.x0, view.y0, event.motion.x, event.motion.y);
     }
     break;
 
     default:break;
   }
+}
+
+/*
+paint: Utility function that paints colors to a canvas.
+The location to paint is given by x and y, the color to paint is
+a mixture of red, green, and blue values in the range 0 to 255.
+*/
+void Graffiti::Paint(const int& x, const int& y)
+{
+  printf("x: %d, y: %d\n", x, y);
+  printf("sx: %f, ox: %f\n", CurGame->mouse_scale_x, CurGame->mouse_offs_x);
+  printf("sy: %f, oy: %f\n", CurGame->mouse_scale_y, CurGame->mouse_offs_y);
+  // WARNING mouse_scale_x and mouse_offs_x UNTESTED
+  scale_t mouse_scale_x = CurGame->mouse_scale_x ? CurGame->mouse_scale_x : 1.0;
+  scale_t mouse_scale_y = CurGame->mouse_scale_y ? CurGame->mouse_scale_y : 1.0;
+  int xx = x / view.xscale / mouse_scale_x - CurGame->mouse_offs_x;
+  // WARNING mouse_scale_y untested
+  int yy = y / view.yscale / mouse_scale_y + CurGame->mouse_offs_y;
+
+  const uint32 bg_color = view.canvas->MakeColor(view.red, view.green, view.blue);
+
+  MDFN_DrawFillRect(view.canvas, xx, yy, view.width, view.height, bg_color);
+  *this << static_cast<cmd_t>(Command::paint) << xx << yy << view.width << view.height << bg_color;
+  Send(Command::paint);
+}
+
+void Graffiti::Line(int& x0, int& y0,const int& x1,const int& y1)
+{
+  int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
+  int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1;
+  int err = (dx>dy ? dx : -dy)/2, e2;
+
+  for(;;){
+    Paint(x0,y0);
+    if (x0==x1 && y0==y1) break;
+    e2 = err;
+    if (e2 >-dx) { err -= dy; x0 += sx; }
+    if (e2 < dy) { err += dx; y0 += sy; }
+  }
+
+  x0 = x1;
+  y0 = y1;
+}
+
+void Graffiti::Send(Command command)
+{ // assumes {Super,}magic is properly orchestrated and no other content has been pushed to str
+  switch(command)
+  {
+  case Command::clear:
+    *this << static_cast<cmd_t>(Command::clear);
+    break;
+  case Command::paint:
+    break;
+  case Command::sync:
+    // TODO
+    break;
+  }
+  TextCommand::Send();
 }
 
 bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &display)
@@ -256,45 +316,4 @@ void Graffiti::RecvSync(const char *msg, uint32 len)
   }
 
   uncompress((Bytef *)view.canvas->pixels, &dlen, (Bytef *)&msg[4], len - 4);
-}
-
-/*
-paint: Utility function that paints colors to a canvas.
-The location to paint is given by x and y, the color to paint is
-a mixture of red, green, and blue values in the range 0 to 255.
-*/
-void Graffiti::Paint(const int& x, const int& y)
-{
-  printf("x: %d, y: %d\n", x, y);
-  printf("sx: %f, ox: %f\n", CurGame->mouse_scale_x, CurGame->mouse_offs_x);
-  printf("sy: %f, oy: %f\n", CurGame->mouse_scale_y, CurGame->mouse_offs_y);
-  // WARNING mouse_scale_x and mouse_offs_x UNTESTED
-  scale_t mouse_scale_x = CurGame->mouse_scale_x ? CurGame->mouse_scale_x : 1.0;
-  scale_t mouse_scale_y = CurGame->mouse_scale_y ? CurGame->mouse_scale_y : 1.0;
-  int xx = x / view.xscale / mouse_scale_x - CurGame->mouse_offs_x;
-  // WARNING mouse_scale_y untested
-  int yy = y / view.yscale / mouse_scale_y + CurGame->mouse_offs_y;
-
-  const uint32 bg_color = view.canvas->MakeColor(view.red, view.green, view.blue);
-  
-  // printf("x = %d, y = %d\n", x, y);
-  MDFN_DrawFillRect(view.canvas, xx, yy, view.width, view.height, bg_color);
-  *this << static_cast<cmd_t>(Command::paint) << xx << yy << view.width << view.height << bg_color;
-  Send(Command::paint);
-}
-
-void Graffiti::Send(Command command)
-{ // assumes {Super,}magic is properly orchestrated and no other content has been pushed to str
-  switch(command)
-  {
-  case Command::clear:
-    *this << static_cast<cmd_t>(Command::clear);
-    break;
-  case Command::paint:
-    break;
-  case Command::sync:
-    // TODO
-    break;
-  }
-  TextCommand::Send();
 }
