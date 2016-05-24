@@ -211,6 +211,7 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &disp
 
       std::thread t1(&Graffiti::RecvSync, this, msg, len);
       t1.detach();
+      //RecvSync(msg, len);
     }
     break;
   case Command::clear:
