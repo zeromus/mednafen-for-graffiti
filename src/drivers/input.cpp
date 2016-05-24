@@ -36,9 +36,6 @@
 
 #include <math.h>
 
-#include "../netplay-graffiti.h"
-extern Graffiti *graffiti;
-
 extern JoystickManager *joy_manager;
 
 bool RewindState = true;
@@ -806,8 +803,6 @@ void MainSetEventHook(int (*eh)(const SDL_Event *event))
 
 void Input_Event(const SDL_Event *event)
 {
- graffiti->Input_Event(*event);
-
  switch(event->type)
  {
   case SDL_MOUSEBUTTONDOWN:

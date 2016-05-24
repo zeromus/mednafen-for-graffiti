@@ -1150,6 +1150,9 @@ static void GameThread_HandleEvents(void)
   }
 
   Input_Event(event);
+#ifdef ENABLE_GRAFFITI
+  graffiti->Input_Event(*event);
+#endif
 
   if(Debugger_IsActive())
    Debugger_GT_Event(event);
@@ -1822,8 +1825,11 @@ for(int zgi = 1; zgi < argc; zgi++)// start game load test loop
          VTBuffer[1] = new MDFN_Surface(NULL, CurGame->fb_width, CurGame->fb_height, pitch32, nf);
          VTLineWidths[0] = (int32 *)calloc(CurGame->fb_height, sizeof(int32));
          VTLineWidths[1] = (int32 *)calloc(CurGame->fb_height, sizeof(int32));
+#ifdef ENABLE_GRAFFITI
+    printf ("nominal_width == %d, nominal_height = %d\n", CurGame->nominal_width, CurGame->nominal_height);
+    printf ("fb_width == %d, fb_height = %d\n", CurGame->fb_width, CurGame->fb_height);
     graffiti = new Graffiti(new MDFN_Surface(NULL, CurGame->fb_width, CurGame->fb_height, pitch32, nf));
-
+#endif
          for(int i = 0; i < 2; i++)
 	 {
           ((MDFN_Surface *)VTBuffer[i])->Fill(0, 0, 0, 0);

@@ -650,14 +650,7 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
    case MDFNNPCMD_REQUEST_STATE:
 #ifdef ENABLE_GRAFFITI
       printf("REQUEST_STATE\n");
-      graffiti->will_broadcast = true;
-      {
-        // std::thread t1(&Graffiti::Broadcast, graffiti);
-        // t1.detach();
-        graffiti->Broadcast();
-        // graffiti->ClearLocal();
-        // graffiti->ClearRemote();
-      }
+      graffiti->Broadcast();
 #endif
 			SendState();
 	  	 	break;

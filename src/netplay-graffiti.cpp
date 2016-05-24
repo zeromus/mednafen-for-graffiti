@@ -53,14 +53,18 @@ bool Graffiti::ConsoleParse(const char *arg)
 {
   if (!strcmp("", arg))
     Toggle();
-  else if (!strcmp("on", arg))
+  else if (!strcmp("enable", arg) || !strcmp("en", arg))
     Enable();
-  else if (!strcmp("off", arg))
+  else if (!strcmp("disable", arg) || !strcmp("dis", arg))
+  {
     Disable();
+    return false;
+  }
   else if (!strcmp("clear", arg))
   {
     ClearLocal();
     ClearRemote();
+    return false;
   }
 
   return true;  // keep console open
@@ -113,7 +117,8 @@ bool Graffiti::Broadcast()
   compress2((Bytef *)&cbuf[0] + 4, &clen, (Bytef *)view.canvas->pixels, view.canvas->Size(), 7);
 
   fprintf(stderr, "Clen = %d", clen);
-  // INEFFICIENT - just to see if it works first
+  // WARNING INEFFICIENT - just to see if it works first
+  // ideally cbuf should be the istr to begin with (resized and at the proper index)
   cbuf.resize(clen + 4);
   for (auto i : cbuf)
     *this << i;
@@ -134,7 +139,7 @@ void Graffiti::Blit(MDFN_Surface *target)
   uint32 *canvas_pixels = (uint32*)view.canvas->pixels;
   uint32 *target_pixels = (uint32*)target->pixels;
 
-  for(int32 i = 0; i < target->pitchinpix * target->h; i++)
+  for(uint32 i = 0; i < target->pitchinpix * target->h; i++)
     if(canvas_pixels[i])
       target_pixels[i] = canvas_pixels[i];
 }
@@ -143,6 +148,24 @@ void Graffiti::Input_Event(const SDL_Event &event)
 {
   if(!enabled)
     return;
+
+  /* Hack to disallow a "focus-click" to act as a paint event */
+  static SDL_Event last {};
+  switch(last.type)
+  {
+  case SDL_USEREVENT:
+    switch(last.user.code)
+    {
+    case CEVT_SET_INPUT_FOCUS:
+      last = event;
+      return;
+    }
+    break;
+  default:
+    last = event;
+    break;
+  }
+  /* End Hack */
 
   switch(event.type)
   {
@@ -178,26 +201,19 @@ void Graffiti::Input_Event(const SDL_Event &event)
   }
 }
 
-// void Graffiti::Send(const std::string &msg)
-// {
-//   draw_command.Send(msg);
-// }
-
 bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &display)
 {
-  // printf("0x%04X\n", magic);
-  printf("IN DRAW\n");
-  // for (int i=0; i < len; i++)
-  //   printf("0x%02x ", static_cast<unsigned char>(msg[i]));
-
   LoadPacket(msg, sizeof(cmd_t));
   cmd_t cmd;
   *this >> cmd;
+
+  msg += sizeof(cmd_t);
+
   switch(cmd)
   {
   case Command::paint:
     {
-      LoadPacket(&msg[sizeof(cmd_t)], len - sizeof(cmd_t));
+      LoadPacket(&msg[0], len);
       uint32 x,y,w,h,bg_color;
       *this >> x >> y >> w >> h >> bg_color;
       std::cout << "x: " << x << "y: " << y << "w: " << w << "h: " << h << "bg: " << bg_color << std::endl;
@@ -215,13 +231,12 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &disp
       for (int i=0; i < 24; i++)
         printf("0x%02x ", static_cast<unsigned char>(msg[i]));
 
-      std::thread t1(&Graffiti::RecvSync, this, msg, len);
-      t1.detach();
-      //RecvSync(msg, len);
+      // std::thread t1(&Graffiti::RecvSync, this, msg, len);
+      // t1.detach();
+      RecvSync(msg, len);
     }
     break;
   case Command::clear:
-    // Clear surface
     if (!strcasecmp(nick, OurNick))
       break;
     view.Clear();
@@ -234,17 +249,14 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &disp
 
 void Graffiti::RecvSync(const char *msg, uint32 len)
 {
-  uLongf dlen = MDFN_de32lsb(&msg[sizeof(cmd_t)]); 
+  uLongf dlen = MDFN_de32lsb(&msg[0]);
   printf ("dlen = %d\n", dlen);
-  // if(len > 12 * 1024 * 1024) // Uncompressed length sanity check - 12 MiB max.
-  // {
-  //   throw MDFN_Error(0, _("Uncompressed save state data is too large: %llu"), (unsigned long long)len);
-  // }
+  if(len > view.canvas->Size()) // Uncompressed length sanity check - 1 MiB max.
+  {
+    throw MDFN_Error(0, _("Uncompressed save state data is too large: %llu"), (unsigned long long)len);
+  }
 
-  //MemoryStream sm(len, -1);
-
-  //MemoryStream sm(dlen, -1);
-  uncompress((Bytef *)view.canvas->pixels, &dlen, (Bytef *)&msg[sizeof(cmd_t) + 4], len - 4 - sizeof(cmd_t));
+  uncompress((Bytef *)view.canvas->pixels, &dlen, (Bytef *)&msg[4], len - 4);
 }
 
 /*
@@ -257,8 +269,12 @@ void Graffiti::Paint(const int& x, const int& y)
   printf("x: %d, y: %d\n", x, y);
   printf("sx: %f, ox: %f\n", CurGame->mouse_scale_x, CurGame->mouse_offs_x);
   printf("sy: %f, oy: %f\n", CurGame->mouse_scale_y, CurGame->mouse_offs_y);
-  int xx = x / view.xscale; //CurGame->mouse_scale_x - CurGame->mouse_offs_x;
-  int yy = y / view.yscale; //CurGame->mouse_scale_y - CurGame->mouse_offs_y;
+  // WARNING mouse_scale_x and mouse_offs_x UNTESTED
+  scale_t mouse_scale_x = CurGame->mouse_scale_x ? CurGame->mouse_scale_x : 1.0;
+  scale_t mouse_scale_y = CurGame->mouse_scale_y ? CurGame->mouse_scale_y : 1.0;
+  int xx = x / view.xscale / mouse_scale_x - CurGame->mouse_offs_x;
+  // WARNING mouse_scale_y untested
+  int yy = y / view.yscale / mouse_scale_y + CurGame->mouse_offs_y;
 
   const uint32 bg_color = view.canvas->MakeColor(view.red, view.green, view.blue);
   
@@ -269,7 +285,7 @@ void Graffiti::Paint(const int& x, const int& y)
 }
 
 void Graffiti::Send(Command command)
-{ // assumes {Super}magic is properly orchestrated and no other content has been pushed to str
+{ // assumes {Super,}magic is properly orchestrated and no other content has been pushed to str
   switch(command)
   {
   case Command::clear:
