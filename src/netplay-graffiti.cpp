@@ -112,7 +112,9 @@ bool Graffiti::Broadcast()
   MDFN_en32lsb(&cbuf[0], view.canvas->Size());
   compress2((Bytef *)&cbuf[0] + 4, &clen, (Bytef *)view.canvas->pixels, view.canvas->Size(), 7);
 
+  fprintf(stderr, "Clen = %d", clen);
   // INEFFICIENT - just to see if it works first
+  cbuf.resize(clen + 4);
   for (auto i : cbuf)
     *this << i;
 
