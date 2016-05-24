@@ -648,10 +648,18 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
 			break;
 
    case MDFNNPCMD_REQUEST_STATE:
+#ifdef ENABLE_GRAFFITI
+      printf("REQUEST_STATE\n");
+      graffiti->will_broadcast = true;
+#endif
 			SendState();
 	  	 	break;
 
    case MDFNNPCMD_LOADSTATE:
+#ifdef ENABLE_GRAFFITI
+      printf("LOADSTATE\n");
+      graffiti->Broadcast();
+#endif
 			RecvState(raw_len);
 			StateLoaded = true;
 			MDFN_DispMessage(_("Remote state loaded."));
@@ -1000,6 +1008,7 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
 			 // Update players list.
 			 if(cmd == MDFNNPCMD_YOUJOINED || cmd == MDFNNPCMD_PLAYERJOINED)
 			 {
+        printf ("%s\n", cmd == MDFNNPCMD_YOUJOINED ? "YOU JOINED" : "PLAYER JOINED");
 			  PlayersList[std::string((const char*)neobuf + 8)] = mps;
 			 }
 			 else
@@ -1206,7 +1215,7 @@ static CommandEntry ConsoleCommands[]   =
 
  { "/ping", CC_ping,		"", "Pings the server." },
 
-#ifdef __MDFN_NETPLAY_GRAFFITI_H
+#ifdef ENABLE_GRAFFITI
  GraffitiCommand,
 #endif
  //{ "/integrity", CC_integrity,	"", "Starts netplay integrity check sequence." },

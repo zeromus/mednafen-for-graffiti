@@ -16,9 +16,9 @@ bool TextCommand::Active() { return active; }
 
 void TextCommand::Send(const std::string& message)
 {
-  msg += message;
-  MDFNI_NetplayRaw(msg.c_str(), msg.size());
-  msg.clear();
+  omsg += message;
+  MDFNI_NetplayRaw(omsg.c_str(), omsg.size());
+  omsg.clear();
   *this << Registration::SuperMagic << magic;
 }
 

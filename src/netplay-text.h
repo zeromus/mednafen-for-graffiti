@@ -36,7 +36,7 @@ public:
   TextCommand& operator<< (T i)
   {
     //std::cout << "8bit: 0x" << std::hex << i << std::endl;
-    msg += std::string(reinterpret_cast<const char *>(&i), sizeof(i));
+    omsg += std::string(reinterpret_cast<const char *>(&i), sizeof(i));
     return *this;
   }
 
@@ -47,7 +47,7 @@ public:
     char buf[sizeof(T)];
     MDFN_enlsb<T, false>(buf, i);
 
-    msg += std::string(reinterpret_cast<const char *>(buf), sizeof(i));
+    omsg += std::string(reinterpret_cast<const char *>(buf), sizeof(i));
     return *this;
   }
 
@@ -58,7 +58,7 @@ public:
     char buf[sizeof(T)];
     MDFN_enlsb<T, false>(buf, i);
 
-    msg += std::string(reinterpret_cast<const char *>(buf), sizeof(i));
+    omsg += std::string(reinterpret_cast<const char *>(buf), sizeof(i));
     return *this;
   }
 ////////////
@@ -99,7 +99,7 @@ public:
   void LoadPacket(const char* str, uint32 len);
 
 protected:
-  std::string msg = "";
+  std::string omsg = "";
   std::string imsg;
   magic_t magic=0xdead;
   bool active=true;
