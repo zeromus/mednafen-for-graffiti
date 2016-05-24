@@ -1,6 +1,6 @@
 #include "netplay-text.h"
 
-TextCommand::TextCommand()
+TextCommand::TextCommand(magic_t m) :magic{m}
 {
   TextCommand::Registrar.Register(this);
   *this << Registration::SuperMagic << magic;
@@ -8,11 +8,22 @@ TextCommand::TextCommand()
 
 TextCommand::magic_t TextCommand::Magic() { return magic; }
 
-void TextCommand::Activate() { active = true; }
+void TextCommand::Enable(bool e)
+{
+  enabled = e;
+}
 
-void TextCommand::Deactivate() { active = false; };
+void TextCommand::Disable()
+{
+  enabled = false;
+}
 
-bool TextCommand::Active() { return active; }
+void TextCommand::Toggle()
+{
+  Enable(!enabled);
+}
+
+bool TextCommand::Enabled() { return enabled; }
 
 void TextCommand::Send(const std::string& message)
 {
@@ -24,6 +35,7 @@ void TextCommand::Send(const std::string& message)
 
 static inline bool magic_valid(const char *msg, TextCommand::magic_t magic)
 {
+  printf ("magic == %04x\n", magic);
   return *reinterpret_cast<const TextCommand::magic_t *>(msg) == magic;
 }
 
@@ -70,6 +82,8 @@ void TextCommand::Registration::Process(
   for (auto& cmd : commands)
   {
     if (!cmd->MagicValid(&msg[sizeof(magic_t)]))
+      continue;
+    if (!cmd->Enabled())
       continue;
     if (cmd->Process(nick, &msg[sizeof(magic_t)*2], len, display))
       return;

@@ -24,26 +24,18 @@ public:
 
   static Registration Registrar;
 
-  TextCommand();
+  TextCommand(magic_t m);
 
   magic_t Magic();
 
-  void Activate();
-  void Deactivate();
-  bool Active();
+  void Enable(bool e=true);
+  void Disable();
+  void Toggle();
+  bool Enabled();
 
-  template<class T, typename std::enable_if<std::is_integral<T>::value && sizeof(T)==1, int>::type = 0>
+  template<class T>
   TextCommand& operator<< (T i)
   {
-    //std::cout << "8bit: 0x" << std::hex << i << std::endl;
-    omsg += std::string(reinterpret_cast<const char *>(&i), sizeof(i));
-    return *this;
-  }
-
-  template<class T, typename std::enable_if<std::is_integral<T>::value && sizeof(T)==2, int>::type = 0>
-  TextCommand& operator<< (T i)
-  {
-    //std::cout << "16bit: 0x" << std::hex << i << std::endl;
     char buf[sizeof(T)];
     MDFN_enlsb<T, false>(buf, i);
 
@@ -51,41 +43,9 @@ public:
     return *this;
   }
 
-  template<class T, typename std::enable_if<std::is_integral<T>::value && sizeof(T)==4, int>::type = 0>
-  TextCommand& operator<< (T i)
-  {
-    //std::cout << "32bit: 0x" << std::hex << i << std::endl;
-    char buf[sizeof(T)];
-    MDFN_enlsb<T, false>(buf, i);
-
-    omsg += std::string(reinterpret_cast<const char *>(buf), sizeof(i));
-    return *this;
-  }
-////////////
-  template<class T, typename std::enable_if<std::is_integral<T>::value && sizeof(T)==1, int>::type = 0>
+  template<class T>
   TextCommand& operator>> (T &i)
   {
-    //std::cout << "8bit: 0x" << std::hex << i << std::endl;
-    i = reinterpret_cast<T>(imsg[0]);
-    imsg.erase(0, sizeof(i));
-    return *this;
-  }
-
-  template<class T, typename std::enable_if<std::is_integral<T>::value && sizeof(T)==2, int>::type = 0>
-  TextCommand& operator>> (T &i)
-  {
-    //std::cout << "16bit: 0x" << std::hex << i << std::endl;
-    i = MDFN_delsb<T, false>(&imsg[0]);
-
-    imsg.erase(0, sizeof(i));
-    return *this;
-  }
-
-  template<class T, typename std::enable_if<std::is_integral<T>::value && sizeof(T)==4, int>::type = 0>
-  TextCommand& operator>> (T &i)
-  {
-    //std::cout << "32bit: 0x" << std::hex << i << std::endl;
-
     i = MDFN_delsb<T, false>(&imsg[0]);
     imsg.erase(0, sizeof(i));
     return *this;
@@ -99,10 +59,10 @@ public:
   void LoadPacket(const char* str, uint32 len);
 
 protected:
-  std::string omsg = "";
+  std::string omsg;
   std::string imsg;
-  magic_t magic=0xdead;
-  bool active=true;
+  bool enabled {false};
   static std::string magic2str(magic_t m);
+  magic_t magic;
 private:
 };

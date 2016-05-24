@@ -4,23 +4,7 @@ static bool CC_graffiti(const char *arg)
 {
   extern Graffiti *graffiti;
 
-  if (!strcmp("", arg))
-    graffiti->Toggle();
-
-  if (!strcmp("on", arg))
-  {
-    graffiti->Enable();
-  }
-  else if (!strcmp("off", arg))
-  {
-    graffiti->Disable();
-  }
-  else if (!strcmp("clear", arg))
-  {
-    graffiti->Clear();
-  }
-
-  return true;  // keep console open
+  return graffiti->ConsoleParse(arg);
 }
 
 // TODO: Write proper help stanza
@@ -30,7 +14,9 @@ const CommandEntry GraffitiCommand {
   "Graffiti"
 };
 
-Graffiti::Graffiti(MDFN_Surface *newcanvas) :view(newcanvas)
+Graffiti::Graffiti(MDFN_Surface *newcanvas) :
+  TextCommand(0xf171),
+  view{newcanvas}
 {
 }
 
@@ -54,31 +40,44 @@ Graffiti::View::~View()
     canvas = nullptr;
   }
 }
+
+void Graffiti::View::Clear()
+{
+  if (canvas)
+  {
+    canvas->Fill(0,0,0,0);
+  }
+}
+///////////////
+bool Graffiti::ConsoleParse(const char *arg)
+{
+  if (!strcmp("", arg))
+    Toggle();
+  else if (!strcmp("on", arg))
+    Enable();
+  else if (!strcmp("off", arg))
+    Disable();
+  else if (!strcmp("clear", arg))
+  {
+    view.Clear();
+    Send(Command::clear);
+  }
+
+  return true;  // keep console open
+}
 ///////////////
 void Graffiti::Enable(bool e)
 {
-  SDL_ShowCursor(e); enabled = e;
+  TextCommand::Enable(e);
+  SDL_ShowCursor(e);
 }
 
 void Graffiti::Disable()
 {
-  SDL_ShowCursor(0); enabled = false;
-}
-
-void Graffiti::Toggle()
-{
-  Enable(!enabled);
+  TextCommand::Disable();
+  SDL_ShowCursor(0);
 }
 ////////////////
-void Graffiti::Clear()
-{
-  if (view.canvas)
-  {
-    view.canvas->Fill(0,0,0,0);
-    // TODO: Tell your netplay friend(s) to do the same!
-  }
-}
-
 void Graffiti::SetScale(const scale_t& x, const scale_t& y)
 {
   view.xscale = x;
@@ -87,20 +86,17 @@ void Graffiti::SetScale(const scale_t& x, const scale_t& y)
 
 bool Graffiti::Broadcast()
 {
-  if (will_broadcast)
-  {
-    will_broadcast = false;
+  if(!enabled || !will_broadcast)
+    return false;
 
-    // compress and send view.surface
-    return true;
-  }
-
-  return false;
+  will_broadcast = false;
+  // compress and send view.surface
+  return true;
 }
 
 void Graffiti::Blit(MDFN_Surface *target)
 {
-  if(!active)
+  if(!enabled)
     return;
 
   // iterate through the canvas
@@ -115,6 +111,9 @@ void Graffiti::Blit(MDFN_Surface *target)
 
 void Graffiti::Input_Event(const SDL_Event &event)
 {
+  if(!enabled)
+    return;
+
   switch(event.type)
   {
   case SDL_MOUSEBUTTONDOWN:
@@ -163,16 +162,37 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &disp
 
   LoadPacket(msg, len);
 
-  uint32 x,y,w,h,bg_color;
-  *this >> x >> y >> w >> h >> bg_color;
-  std::cout << "x: " << x << "y: " << y << "w: " << w << "h: " << h << "bg: " << bg_color << std::endl;
+  cmd_t cmd;
+  *this >> cmd;
+  switch(cmd)
+  {
+  case Command::paint:
+    {
+      uint32 x,y,w,h,bg_color;
+      *this >> x >> y >> w >> h >> bg_color;
+      std::cout << "x: " << x << "y: " << y << "w: " << w << "h: " << h << "bg: " << bg_color << std::endl;
 
-  if (strcasecmp(nick, OurNick))
-    MDFN_DrawFillRect(view.canvas, x, y, w, h, bg_color);
+      if (strcasecmp(nick, OurNick))
+        MDFN_DrawFillRect(view.canvas, x, y, w, h, bg_color);
+    }
+    break;
+  case Command::sync:
+    // TODO: download / decompress / load surface data
+    if (!strcasecmp(nick, OurNick))
+      break;
+    //
+    break;
+  case Command::clear:
+    // Clear surface
+    if (!strcasecmp(nick, OurNick))
+      break;
+    //
+    view.Clear();
+    break;
+  }
 
   display = false;
-
-  return false;
+  return true;
 }
 
 /*
@@ -182,9 +202,6 @@ a mixture of red, green, and blue values in the range 0 to 255.
 */
 void Graffiti::Paint(const int& x, const int& y)
 {
-  if(!active)
-    return;
-
   printf("x: %d, y: %d\n", x, y);
   printf("sx: %f, ox: %f\n", CurGame->mouse_scale_x, CurGame->mouse_offs_x);
   printf("sy: %f, oy: %f\n", CurGame->mouse_scale_y, CurGame->mouse_offs_y);
@@ -195,6 +212,22 @@ void Graffiti::Paint(const int& x, const int& y)
   
   // printf("x = %d, y = %d\n", x, y);
   MDFN_DrawFillRect(view.canvas, xx, yy, view.width, view.height, bg_color);
-  *this << xx << yy << view.width << view.height << bg_color;
-  Send();
+  *this << static_cast<cmd_t>(Command::paint) << xx << yy << view.width << view.height << bg_color;
+  Send(Command::paint);
+}
+
+void Graffiti::Send(Command command)
+{ // assumes {Super}magic is properly orchestrated and no other content has been pushed to str
+  switch(command)
+  {
+  case Command::clear:
+    *this << static_cast<cmd_t>(Command::clear);
+    break;
+  case Command::paint:
+    break;
+  case Command::sync:
+    // TODO
+    break;
+  }
+  TextCommand::Send();
 }
