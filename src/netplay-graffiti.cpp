@@ -4,7 +4,7 @@ static bool CC_graffiti(const char *arg)
 {
   extern Graffiti *graffiti;
 
-  return graffiti->ConsoleParse(arg);
+  return graffiti->ParseConsoleCommand(arg);
 }
 
 // TODO: Write proper help stanza
@@ -14,21 +14,21 @@ const CommandEntry GraffitiCommand {
   "Graffiti"
 };
 
-Graffiti::Graffiti(MDFN_Surface *newcanvas) :
+Graffiti::Graffiti(MDFN_Surface *new_canvas) :
   TextCommand(0xf171),
-  view{newcanvas}
+  view{new_canvas}
 {
 }
 
 
-Graffiti::View::View(MDFN_Surface *newcanvas)
+Graffiti::View::View(MDFN_Surface *new_canvas)
 {
   if (canvas)
   {
     delete canvas;
   }
 
-  canvas = newcanvas;
+  canvas = new_canvas;
   canvas->Fill(0, 0, 0, 0);
 }
 
@@ -49,7 +49,7 @@ void Graffiti::View::Clear()
   }
 }
 ///////////////
-bool Graffiti::ConsoleParse(const char *arg)
+bool Graffiti::ParseConsoleCommand(const char *arg)
 {
   if (!strcmp("", arg))
     ToggleActivate();
@@ -62,16 +62,16 @@ bool Graffiti::ConsoleParse(const char *arg)
   }
   else if (!strcmp("clear", arg))
   {
-    ClearLocal();
-    ClearRemote();
+    ClearLocalSurface();
+    ClearRemoteSurfaces();
     return false;
   }
 
   return true;  // keep console open
 }
 
-void Graffiti::ClearLocal() { view.Clear(); }
-void Graffiti::ClearRemote() { Send(Command::clear); }
+void Graffiti::ClearLocalSurface() { view.Clear(); }
+void Graffiti::ClearRemoteSurfaces() { Send(Command::clear); }
 ///////////////
 void Graffiti::Enable(bool e)
 {
@@ -85,7 +85,7 @@ void Graffiti::Disable()
   active = false;
   TextCommand::Disable();
   SDL_MDFN_ShowCursor(0);
-  ClearLocal();
+  ClearLocalSurface();
 }
 
 void Graffiti::Activate(bool e)
