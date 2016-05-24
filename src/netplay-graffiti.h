@@ -1,6 +1,8 @@
 #ifndef __MDFN_NETPLAY_GRAFFITI_H
 #define __MDFN_NETPLAY_GRAFFITI_H
 
+#include <thread>
+
 #define ENABLE_GRAFFITI
 
 #include "netplay-text.h"
@@ -29,6 +31,9 @@ public:
   void SetScale(const scale_t& x, const scale_t& y);
 
   void Send(Command command);
+
+  void RecvSync(const char *msg, uint32 len);
+  bool synced {false};
 
 private:
   bool Process(const char *nick, const char *msg, uint32 len, bool &display);

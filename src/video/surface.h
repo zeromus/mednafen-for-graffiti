@@ -217,6 +217,11 @@ class MDFN_Surface //typedef struct
 
  MDFN_PixelFormat format;
 
+ INLINE size_t Size() const  // surface size
+ {
+  return pitchinpix * h * (format.bpp / 8);
+ }
+
  void Fill(uint8 r, uint8 g, uint8 b, uint8 a);
  void SetFormat(const MDFN_PixelFormat &new_format, bool convert);
 

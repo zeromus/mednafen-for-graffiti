@@ -89,8 +89,32 @@ bool Graffiti::Broadcast()
   if(!enabled || !will_broadcast)
     return false;
 
+  printf("BROADCASTING\n");
   will_broadcast = false;
   // compress and send view.surface
+  std::vector<uint8> cbuf;
+  uLongf clen;
+
+  for (int i=0; i < 24; i++)
+    printf("0x%02x ", static_cast<unsigned char>(view.canvas->pixels[i]));
+
+  fflush(stdout);
+
+  *this << static_cast<cmd_t>(Command::sync);
+
+  // TODO / WARNING -- this relies on all client surfaces using the same BPP
+  clen = view.canvas->Size() + view.canvas->Size() / 1000 + 12;
+  cbuf.resize(4 + clen);
+  MDFN_en32lsb(&cbuf[0], view.canvas->Size());
+  compress2((Bytef *)&cbuf[0] + 4, &clen, (Bytef *)view.canvas->pixels, view.canvas->Size(), 7);
+
+  // INEFFICIENT - just to see if it works first
+  for (auto i : cbuf)
+    *this << i;
+
+  printf("canvas size: %d\n", view.canvas->Size());
+
+  Send(Command::sync);
   return true;
 }
 
@@ -160,14 +184,14 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &disp
   // for (int i=0; i < len; i++)
   //   printf("0x%02x ", static_cast<unsigned char>(msg[i]));
 
-  LoadPacket(msg, len);
-
+  LoadPacket(msg, sizeof(cmd_t));
   cmd_t cmd;
   *this >> cmd;
   switch(cmd)
   {
   case Command::paint:
     {
+      LoadPacket(&msg[sizeof(cmd_t)], len - sizeof(cmd_t));
       uint32 x,y,w,h,bg_color;
       *this >> x >> y >> w >> h >> bg_color;
       std::cout << "x: " << x << "y: " << y << "w: " << w << "h: " << h << "bg: " << bg_color << std::endl;
@@ -177,22 +201,43 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &disp
     }
     break;
   case Command::sync:
-    // TODO: download / decompress / load surface data
-    if (!strcasecmp(nick, OurNick))
-      break;
-    //
+    {
+      // TODO: download / decompress / load surface data
+      if (!strcasecmp(nick, OurNick))
+        break;
+      fprintf (stderr, "SYNC RECEIVED\n");
+      for (int i=0; i < 24; i++)
+        printf("0x%02x ", static_cast<unsigned char>(msg[i]));
+
+      std::thread t1(&Graffiti::RecvSync, this, msg, len);
+      t1.detach();
+    }
     break;
   case Command::clear:
     // Clear surface
     if (!strcasecmp(nick, OurNick))
       break;
-    //
     view.Clear();
     break;
   }
 
   display = false;
   return true;
+}
+
+void Graffiti::RecvSync(const char *msg, uint32 len)
+{
+  uLongf dlen = MDFN_de32lsb(&msg[sizeof(cmd_t)]); 
+  printf ("dlen = %d\n", dlen);
+  // if(len > 12 * 1024 * 1024) // Uncompressed length sanity check - 12 MiB max.
+  // {
+  //   throw MDFN_Error(0, _("Uncompressed save state data is too large: %llu"), (unsigned long long)len);
+  // }
+
+  //MemoryStream sm(len, -1);
+
+  //MemoryStream sm(dlen, -1);
+  uncompress((Bytef *)view.canvas->pixels, &dlen, (Bytef *)&msg[sizeof(cmd_t) + 4], len - 4 - sizeof(cmd_t));
 }
 
 /*
