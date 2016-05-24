@@ -15,7 +15,7 @@ Bresenham Line algo from http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_a
 #ifndef __MDFN_NETPLAY_GRAFFITI_H
 #define __MDFN_NETPLAY_GRAFFITI_H
 
-#include <thread>
+// #include <thread>
 
 #define ENABLE_GRAFFITI
 
@@ -44,6 +44,9 @@ public:
 
   void Enable(bool e=true);
   void Disable();
+  void Activate(bool e=true);
+  void Deactivate();
+  void ToggleActivate();
 
   void ClearLocal();
   void ClearRemote();
@@ -58,6 +61,7 @@ private:
   void Line(int& x0, int& y0,const int& x1,const int& y1);
 
   bool painting {false};
+  bool active {false};
 
   enum Command : cmd_t { paint, sync, clear };
 

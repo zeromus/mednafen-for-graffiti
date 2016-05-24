@@ -30,7 +30,7 @@ public:
 
   void Enable(bool e=true);
   void Disable();
-  void Toggle();
+  void ToggleEnable();
   bool Enabled();
 
   template<class T>

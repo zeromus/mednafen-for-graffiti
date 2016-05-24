@@ -18,7 +18,7 @@ void TextCommand::Disable()
   enabled = false;
 }
 
-void TextCommand::Toggle()
+void TextCommand::ToggleEnable()
 {
   Enable(!enabled);
 }

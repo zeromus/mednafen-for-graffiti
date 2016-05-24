@@ -52,12 +52,12 @@ void Graffiti::View::Clear()
 bool Graffiti::ConsoleParse(const char *arg)
 {
   if (!strcmp("", arg))
-    Toggle();
+    ToggleActivate();
   else if (!strcmp("enable", arg) || !strcmp("en", arg))
-    Enable();
+    Activate();
   else if (!strcmp("disable", arg) || !strcmp("dis", arg))
   {
-    Disable();
+    Deactivate();
     return false;
   }
   else if (!strcmp("clear", arg))
@@ -75,15 +75,34 @@ void Graffiti::ClearRemote() { Send(Command::clear); }
 ///////////////
 void Graffiti::Enable(bool e)
 {
+  active = e;
   TextCommand::Enable(e);
   SDL_ShowCursor(e);
 }
 
 void Graffiti::Disable()
 {
+  active = false;
   TextCommand::Disable();
   SDL_ShowCursor(0);
   ClearLocal();
+}
+
+void Graffiti::Activate(bool e)
+{
+  SDL_ShowCursor(e);
+  active = e;
+}
+
+void Graffiti::Deactivate()
+{
+  SDL_ShowCursor(0);
+  active = false;
+}
+
+void Graffiti::ToggleActivate()
+{
+  Activate(!active);
 }
 ////////////////
 void Graffiti::SetScale(const scale_t& x, const scale_t& y)
@@ -130,7 +149,7 @@ bool Graffiti::Broadcast()
 
 void Graffiti::Blit(MDFN_Surface *target)
 {
-  if(!enabled)
+  if(!enabled || !active)
     return;
 
   // iterate through the canvas
@@ -145,7 +164,7 @@ void Graffiti::Blit(MDFN_Surface *target)
 
 void Graffiti::Input_Event(const SDL_Event &event)
 {
-  if(!enabled)
+  if(!enabled || !active)
     return;
 
   /* Hack to disallow a "focus-click" to act as a paint event */
