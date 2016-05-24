@@ -94,11 +94,10 @@ void Graffiti::SetScale(const scale_t& x, const scale_t& y)
 
 bool Graffiti::Broadcast()
 {
-  if(!enabled || !will_broadcast)
+  if(!enabled)
     return false;
 
   printf("BROADCASTING\n");
-  will_broadcast = false;
   // compress and send view.surface
   std::vector<uint8> cbuf;
   uLongf clen;

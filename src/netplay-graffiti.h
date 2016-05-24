@@ -1,3 +1,15 @@
+/* Working emulators "out-of-the-box" (various config settings NOT tested yet)
+  - SNES
+  - NES
+  - NGP
+  - GBC
+  - SMS
+
+Problematic Emulators
+  - PCE (needs mouse scroll/offset setting impl!)
+
+Unlisted emulators haven't been tested yet
+*/
 #ifndef __MDFN_NETPLAY_GRAFFITI_H
 #define __MDFN_NETPLAY_GRAFFITI_H
 
@@ -22,7 +34,6 @@ public:
   void Input_Event(const SDL_Event& event);
   void Blit(MDFN_Surface *target);
   bool Broadcast(); // returns true if actually broadcasted
-  bool will_broadcast {false};
 
   // init video
   void SetScale(const scale_t& x, const scale_t& y);
