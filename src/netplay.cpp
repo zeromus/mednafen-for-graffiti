@@ -654,7 +654,9 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
       {
         // std::thread t1(&Graffiti::Broadcast, graffiti);
         // t1.detach();
-        graffiti->Broadcast();
+        //graffiti->Broadcast();
+        graffiti->ClearLocal();
+        graffiti->ClearRemote();
       }
 #endif
 			SendState();
@@ -727,7 +729,7 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
        bool display = true;
        const char* nick = NULL;
        const char* msg = NULL;
-			 static const uint32 MaxLength = 10000000;//2000;
+			 static const uint32 MaxLength = 2000;
 			 char neobuf[MaxLength + 1];
 			 const uint32 totallen = raw_len;
                          uint32 nicklen;

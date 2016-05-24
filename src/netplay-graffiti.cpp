@@ -59,12 +59,15 @@ bool Graffiti::ConsoleParse(const char *arg)
     Disable();
   else if (!strcmp("clear", arg))
   {
-    view.Clear();
-    Send(Command::clear);
+    ClearLocal();
+    ClearRemote();
   }
 
   return true;  // keep console open
 }
+
+void Graffiti::ClearLocal() { view.Clear(); }
+void Graffiti::ClearRemote() { Send(Command::clear); }
 ///////////////
 void Graffiti::Enable(bool e)
 {
@@ -76,6 +79,7 @@ void Graffiti::Disable()
 {
   TextCommand::Disable();
   SDL_ShowCursor(0);
+  ClearLocal();
 }
 ////////////////
 void Graffiti::SetScale(const scale_t& x, const scale_t& y)

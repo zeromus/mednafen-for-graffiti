@@ -24,16 +24,20 @@ public:
   bool Broadcast(); // returns true if actually broadcasted
   bool will_broadcast {false};
 
+  // init video
+  void SetScale(const scale_t& x, const scale_t& y);
+
+  bool ConsoleParse(const char *msg);
+
   void Enable(bool e=true);
   void Disable();
 
-  bool ConsoleParse(const char *msg);
-  void SetScale(const scale_t& x, const scale_t& y);
+  void ClearLocal();
+  void ClearRemote();
 
   void Send(Command command);
 
   void RecvSync(const char *msg, uint32 len);
-  bool synced {false};
 
 private:
   bool Process(const char *nick, const char *msg, uint32 len, bool &display);
