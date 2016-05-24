@@ -77,26 +77,26 @@ void Graffiti::Enable(bool e)
 {
   active = e;
   TextCommand::Enable(e);
-  SDL_ShowCursor(e);
+  SDL_MDFN_ShowCursor(e);
 }
 
 void Graffiti::Disable()
 {
   active = false;
   TextCommand::Disable();
-  SDL_ShowCursor(0);
+  SDL_MDFN_ShowCursor(0);
   ClearLocal();
 }
 
 void Graffiti::Activate(bool e)
 {
-  SDL_ShowCursor(e);
+  SDL_MDFN_ShowCursor(e);
   active = e;
 }
 
 void Graffiti::Deactivate()
 {
-  SDL_ShowCursor(0);
+  SDL_MDFN_ShowCursor(0);
   active = false;
 }
 
