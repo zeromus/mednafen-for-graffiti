@@ -190,7 +190,7 @@ void Graffiti::Input_Event(const SDL_Event &event)
   case SDL_MOUSEBUTTONDOWN:
     if(event.button.state == SDL_PRESSED)
     {
-      printf ("painting TRUE\n");
+      //printf ("painting TRUE\n");
       painting = true;
       view.red = (rand() % 8) * 32;
       view.green = (rand() % 8) * 32;
@@ -204,7 +204,7 @@ void Graffiti::Input_Event(const SDL_Event &event)
   case SDL_MOUSEBUTTONUP:
     if(event.button.state == SDL_RELEASED)
     {
-      printf ("painting FALSE\n");
+      //printf ("painting FALSE\n");
       painting = false;
     }
     break;
@@ -212,7 +212,7 @@ void Graffiti::Input_Event(const SDL_Event &event)
   case SDL_MOUSEMOTION:
     if(painting) {
       // Continue painting
-      printf ("painting MOTION\n");
+      //printf ("painting MOTION\n");
       Line(view.x0, view.y0, event.motion.x, event.motion.y);
     }
     break;
@@ -221,11 +221,6 @@ void Graffiti::Input_Event(const SDL_Event &event)
   }
 }
 
-/*
-paint: Utility function that paints colors to a canvas.
-The location to paint is given by x and y, the color to paint is
-a mixture of red, green, and blue values in the range 0 to 255.
-*/
 void Graffiti::Paint(const int& x, const int& y)
 {
   printf("x: %d, y: %d\n", x, y);
@@ -309,8 +304,6 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &disp
       for (int i=0; i < 24; i++)
         printf("0x%02x ", static_cast<unsigned char>(msg[i]));
 
-      // std::thread t1(&Graffiti::RecvSync, this, msg, len);
-      // t1.detach();
       RecvSync(msg, len);
     }
     break;
