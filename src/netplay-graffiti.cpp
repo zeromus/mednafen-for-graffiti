@@ -54,7 +54,10 @@ bool Graffiti::ParseConsoleCommand(const char *arg)
   if (!strcmp("", arg))
     ToggleActivate();
   else if (!strcmp("enable", arg) || !strcmp("en", arg))
+  {
+    Enable();
     Activate();
+  }
   else if (!strcmp("disable", arg) || !strcmp("dis", arg))
   {
     Deactivate();
@@ -229,9 +232,9 @@ void Graffiti::Paint(const int& x, const int& y)
   // WARNING mouse_scale_x and mouse_offs_x UNTESTED
   scale_t mouse_scale_x = CurGame->mouse_scale_x ? CurGame->mouse_scale_x : 1.0;
   scale_t mouse_scale_y = CurGame->mouse_scale_y ? CurGame->mouse_scale_y : 1.0;
-  int xx = x / view.xscale / mouse_scale_x - CurGame->mouse_offs_x;
+  int xx = (x / view.xscale) * mouse_scale_x + CurGame->mouse_offs_x;
   // WARNING mouse_scale_y untested
-  int yy = y / view.yscale / mouse_scale_y + CurGame->mouse_offs_y;
+  int yy = (y / view.yscale) * mouse_scale_y + CurGame->mouse_offs_y;
 
   const uint32 bg_color = view.canvas->MakeColor(view.red, view.green, view.blue);
 
