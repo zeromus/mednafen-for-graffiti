@@ -60,9 +60,9 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
         view.blue = 0;
         break;
       default:
-        view.red = (rand() % 8) * 32;
-        view.green = (rand() % 8) * 32;
-        view.blue = (rand() % 8) * 32;
+        view.red = (rand() % 7 + 1) * 32;
+        view.green = (rand() % 7 + 1) * 32;
+        view.blue = (rand() % 7 + 1) * 32;
         break;
       }
       Paint(event.button.x, event.button.y);

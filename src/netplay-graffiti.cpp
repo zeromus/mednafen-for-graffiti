@@ -14,38 +14,38 @@ const CommandEntry Graffiti::ConsoleCommandEntry {
   "Graffiti"
 };
 
-Graffiti::Graffiti(MDFN_Surface *new_canvas) :
+Graffiti::Graffiti(MDFN_Surface *new_surface) :
   TextCommand(0xf171),
-  view{new_canvas}
+  view{new_surface}
 {
 }
 
 
-Graffiti::View::View(MDFN_Surface *new_canvas)
+Graffiti::View::View(MDFN_Surface *new_surface)
 {
-  if (canvas)
+  if (surface)
   {
-    delete canvas;
+    delete surface;
   }
 
-  canvas = new_canvas;
-  canvas->Fill(0, 0, 0, 0);
+  surface = new_surface;
+  surface->Fill(0, 0, 0, 0);
 }
 
 Graffiti::View::~View()
 {
-  if (canvas)
+  if (surface)
   {
-    delete canvas;
-    canvas = nullptr;
+    delete surface;
+    surface = nullptr;
   }
 }
 
 void Graffiti::View::Clear()
 {
-  if (canvas)
+  if (surface)
   {
-    canvas->Fill(0,0,0,0);
+    surface->Fill(0,0,0,0);
   }
 }
 ///////////////
@@ -129,10 +129,10 @@ bool Graffiti::Broadcast()
   *this << static_cast<cmd_t>(Command::sync);
 
   // TODO / WARNING -- this relies on all client surfaces using the same BPP
-  clen = view.canvas->Size() + view.canvas->Size() / 1000 + 12;
+  clen = view.surface->Size() + view.surface->Size() / 1000 + 12;
   cbuf.resize(4 + clen);
-  MDFN_en32lsb(&cbuf[0], view.canvas->Size());
-  compress2((Bytef *)&cbuf[0] + 4, &clen, (Bytef *)view.canvas->pixels, view.canvas->Size(), 7);
+  MDFN_en32lsb(&cbuf[0], view.surface->Size());
+  compress2((Bytef *)&cbuf[0] + 4, &clen, (Bytef *)view.surface->pixels, view.surface->Size(), 7);
 
   MDFN_printf("Clen = %d", clen);
   // WARNING INEFFICIENT - just to see if it works first
@@ -141,7 +141,7 @@ bool Graffiti::Broadcast()
   for (auto i : cbuf)
     *this << i;
 
-  MDFN_printf("canvas size: %d\n", view.canvas->Size());
+  //MDFN_printf("surface size: %d\n", view.surface->Size());
 
   Send(Command::sync);
   return true;
@@ -152,14 +152,14 @@ void Graffiti::Blit(MDFN_Surface *target)
   if(!enabled || !active)
     return;
 
-  // iterate through the canvas
+  // iterate through the surface
   // any pixel sets that aren't 00, copy over to target
-  uint32 *canvas_pixels = (uint32*)view.canvas->pixels;
+  uint32 *surface_pixels = (uint32*)view.surface->pixels;
   uint32 *target_pixels = (uint32*)target->pixels;
 
   for(uint32 i = 0; i < target->pitchinpix * target->h; i++)
-    if(canvas_pixels[i])
-      target_pixels[i] = canvas_pixels[i];
+    if(surface_pixels[i])
+      target_pixels[i] = surface_pixels[i];
 }
 
 extern MDFNGI *CurGame;
@@ -176,14 +176,14 @@ void Graffiti::Paint(const int& x, const int& y)
   // WARNING mouse_scale_y untested
   int yy = (y / view.yscale) * mouse_scale_y + CurGame->mouse_offs_y;
 
-  const uint32 bg_color = view.canvas->MakeColor(view.red, view.green, view.blue);
+  const uint32 bg_color = view.surface->MakeColor(view.red, view.green, view.blue);
 
-  MDFN_DrawFillRect(view.canvas, xx, yy, view.width, view.height, bg_color);
+  MDFN_DrawFillRect(view.surface, xx, yy, view.width, view.height, bg_color);
   *this << static_cast<cmd_t>(Command::paint) << xx << yy << view.width << view.height << bg_color;
   Send(Command::paint);
 }
 
-void Graffiti::Line(int& x0, int& y0,const int& x1,const int& y1)
+void Graffiti::Line(int& x0, int& y0, const int& x1, const int& y1)
 {
   int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
   int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1;
@@ -202,7 +202,7 @@ void Graffiti::Line(int& x0, int& y0,const int& x1,const int& y1)
 }
 
 void Graffiti::Send(Command command)
-{ // assumes {Super,}magic is properly orchestrated and no other content has been pushed to str
+{ // assumes {Super,}magic is properly "queued" and no other content has been pushed to str
   switch(command)
   {
   case Command::clear:
@@ -211,13 +211,12 @@ void Graffiti::Send(Command command)
   case Command::paint:
     break;
   case Command::sync:
-    // TODO
     break;
   }
   TextCommand::Send();
 }
 
-bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &display)
+bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool& display)
 {
   LoadPacket(msg, sizeof(cmd_t));
   cmd_t cmd;
@@ -235,7 +234,7 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &disp
       MDFN_printf("x: %d, y: %d, w: %d, h: %d, bg_color: %d\n", x, y, w, h, bg_color);
 
       if (strcasecmp(nick, OurNick))
-        MDFN_DrawFillRect(view.canvas, x, y, w, h, bg_color);
+        MDFN_DrawFillRect(view.surface, x, y, w, h, bg_color);
     }
     break;
   case Command::sync:
@@ -260,10 +259,10 @@ void Graffiti::RecvSync(const char *msg, uint32 len)
 {
   uLongf dlen = MDFN_de32lsb(&msg[0]);
   MDFN_printf("dlen = %d\n", dlen);
-  if(len > view.canvas->Size()) // Uncompressed length sanity check - 1 MiB max.
+  if(len > view.surface->Size()) // Uncompressed length sanity check - 1 MiB max.
   {
     throw MDFN_Error(0, _("Uncompressed graffiti state data is too large: %llu"), (unsigned long long)len);
   }
 
-  uncompress((Bytef *)view.canvas->pixels, &dlen, (Bytef *)&msg[4], len - 4);
+  uncompress((Bytef *)view.surface->pixels, &dlen, (Bytef *)&msg[4], len - 4);
 }

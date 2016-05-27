@@ -48,7 +48,7 @@ public:
   static const CommandEntry ConsoleCommandEntry;
   static bool ConsoleCommandParser(const char *arg);
 
-  Graffiti(MDFN_Surface *new_canvas);
+  Graffiti(MDFN_Surface *new_surface);
   ~Graffiti();
 
   // the main operating points (MOP)
@@ -97,10 +97,10 @@ protected:
   bool active {false};
 
   struct View {
-    View(MDFN_Surface *newcanvas);
+    View(MDFN_Surface *new_surface);
     ~View();
     void Clear();
-    MDFN_Surface *canvas {nullptr};
+    MDFN_Surface *surface {nullptr};
     uint8 red, green, blue;
     uint32 width {5}, height {5};
     int x0 {0}, y0 {0};
