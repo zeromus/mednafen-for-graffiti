@@ -38,8 +38,9 @@ Bresenham Line algo from http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_a
 class Graffiti : public TextCommand
 {
   using scale_t = double;
-  using coord_t = uint32;
-  using wh_t = uint32;  // width/height
+  using coord_t = uint16;
+  using wh_t = uint16;  // width/height
+  using color_t = uint32;
   using cmd_t = uint8;
   enum Command : cmd_t { paint, line, sync, clear };
   // I am using older style enum because it is easier to cast, given that I
@@ -110,7 +111,7 @@ protected:
     std::vector<uint8> Compress();
     MDFN_Surface *surface {nullptr};
     uint8 red, green, blue;
-    uint32 bg_color;
+    color_t bg_color;
     wh_t width {5}, height {5};
     coord_t x0 {0}, y0 {0};
     scale_t xscale {1}, yscale {1};

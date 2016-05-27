@@ -193,6 +193,7 @@ void Graffiti::Send(Command command)
 
 bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool& display)
 {
+  //MDFN_printf("Len: %d\n", len);
   LoadPacket(msg, sizeof(cmd_t));
   cmd_t cmd;
   *this >> cmd;
@@ -204,7 +205,9 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool& disp
   case Command::paint:
     {
       LoadPacket(&msg[0], len);
-      uint32 x, y, w, h, bg_color;
+      coord_t x,y;
+      wh_t w, h;
+      color_t bg_color;
       *this >> x >> y >> w >> h >> bg_color;
       //MDFN_printf("PAINT: x: %d, y: %d, w: %d, h: %d, bg_color: %d\n", x, y, w, h, bg_color);
 
@@ -215,7 +218,9 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool& disp
   case Command::line:
     {
       LoadPacket(&msg[0], len);
-      uint32 x0, y0, x1, y1, w, h, bg_color;
+      coord_t x0, y0, x1, y1;
+      wh_t w, h;
+      color_t bg_color;
       *this >> x0 >> y0 >> x1 >> y1 >> w >> h >> bg_color;
       // MDFN_printf(
       //   "LINE: x0: %d, y0: %d, x1: %d, y1: %d, w: %d, h: %d, bg_color: %d\n",
