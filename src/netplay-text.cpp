@@ -35,7 +35,7 @@ void TextCommand::Send(const std::string& message)
 
 static inline bool magic_valid(const char *msg, TextCommand::magic_t magic)
 {
-  printf ("magic == %04x\n", magic);
+  MDFN_printf("magic == %04x\n", magic);
   return *reinterpret_cast<const TextCommand::magic_t *>(msg) == magic;
 }
 
@@ -74,7 +74,7 @@ void TextCommand::Registration::Process(
   const char *nick, const char *msg, uint32 len, bool &display)
 {
   // for (int i=0; i < len; i++)
-  //   printf("0x%02x ", static_cast<unsigned char>(msg[i]));
+  //   MDFN_printf("0x%02x ", static_cast<unsigned char>(msg[i]));
 
   if (!SuperMagicValid(msg))
     return;
