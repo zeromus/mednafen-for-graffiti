@@ -392,6 +392,11 @@ static void Load(MDFNFILE *fp)
  SpecExSoundToo = MDFN_GetSettingB("snes_faust.spex.sound");
  SpecExAudioExpected = -1;
 
+ EmulatedSNES_Faust.mouse_scale_x = 256.0 / EmulatedSNES_Faust.nominal_width;
+ EmulatedSNES_Faust.mouse_scale_y = 1.0;
+ EmulatedSNES_Faust.mouse_offs_x = 0.0;
+ EmulatedSNES_Faust.mouse_offs_y = 0.0;
+
  CPU_Init();
 
  memset(CPUM.ReadFuncs, 0, sizeof(CPUM.ReadFuncs));
