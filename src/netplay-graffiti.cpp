@@ -239,16 +239,11 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &disp
     }
     break;
   case Command::sync:
-    {
-      // TODO: download / decompress / load surface data
-      if (!strcasecmp(nick, OurNick))
-        break;
-      MDFN_printf("SYNC RECEIVED\n");
-      for (int i=0; i < 24; i++)
-        MDFN_printf("0x%02x ", static_cast<unsigned char>(msg[i]));
+    if (!strcasecmp(nick, OurNick))
+      break;
+    MDFN_printf("SYNC RECEIVED\n");
 
-      RecvSync(msg, len);
-    }
+    RecvSync(msg, len);
     break;
   case Command::clear:
     if (!strcasecmp(nick, OurNick))
@@ -267,7 +262,7 @@ void Graffiti::RecvSync(const char *msg, uint32 len)
   MDFN_printf("dlen = %d\n", dlen);
   if(len > view.canvas->Size()) // Uncompressed length sanity check - 1 MiB max.
   {
-    throw MDFN_Error(0, _("Uncompressed save state data is too large: %llu"), (unsigned long long)len);
+    throw MDFN_Error(0, _("Uncompressed graffiti state data is too large: %llu"), (unsigned long long)len);
   }
 
   uncompress((Bytef *)view.canvas->pixels, &dlen, (Bytef *)&msg[4], len - 4);
