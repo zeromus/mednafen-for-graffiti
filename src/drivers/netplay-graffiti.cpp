@@ -8,10 +8,8 @@ void GraffitiDriver::ShowCursor(bool s)
   SDL_MDFN_ShowCursor(s);
 }
 
-void GraffitiDriver::Input_Event(const void* ev)
+void GraffitiDriver::Input_Event(const SDL_Event& event)
 {
-  const SDL_Event& event = *reinterpret_cast<const SDL_Event*>(ev);
-
   if(!enabled || !active)
     return;
 

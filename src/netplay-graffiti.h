@@ -49,7 +49,7 @@ public:
 
   // the main operating points (MOP)
   // user input draws to an internal-surface
-  virtual void Input_Event(const void* event)=0;
+  //virtual void Input_Event(const void* event)=0;
   // which gets blitted to the pre-scaled main-surface
   void Blit(MDFN_Surface *target);
   // the server-designated user automatically runs this function to broadcast
