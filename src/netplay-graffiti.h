@@ -90,8 +90,13 @@ public:
   void Send(Command command);
 
 protected:
-  void Paint(const int& x, const int& y);
-  void Line(int& x0, int& y0,const int& x1,const int& y1);
+  void Paint(
+    const int& x, const int& y, const uint32& w, const uint32& h,
+    const uint32& bg_color, const bool broadcast);
+  void Line(
+    int& x0, int& y0, const int& x1, const int& y1,
+    const uint32& w, const uint32& h, const uint32& bg_color);
+  std::pair<int, int> MouseCoords2SurfaceCoords(const int& x, const int& y);
 
   bool painting {false};
   bool active {false};
@@ -102,6 +107,7 @@ protected:
     void Clear();
     MDFN_Surface *surface {nullptr};
     uint8 red, green, blue;
+    uint32 bg_color;
     uint32 width {5}, height {5};
     int x0 {0}, y0 {0};
     scale_t xscale {1}, yscale {1};

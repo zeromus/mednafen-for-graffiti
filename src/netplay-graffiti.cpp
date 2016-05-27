@@ -163,8 +163,7 @@ void Graffiti::Blit(MDFN_Surface *target)
 }
 
 extern MDFNGI *CurGame;
-
-void Graffiti::Paint(const int& x, const int& y)
+std::pair<int, int> Graffiti::MouseCoords2SurfaceCoords(const int& x, const int& y)
 {
   MDFN_printf("x: %d, y: %d\n", x, y);
   MDFN_printf("sx: %f, ox: %f\n", CurGame->mouse_scale_x, CurGame->mouse_offs_x);
@@ -176,21 +175,32 @@ void Graffiti::Paint(const int& x, const int& y)
   // WARNING mouse_scale_y untested
   int yy = (y / view.yscale) * mouse_scale_y + CurGame->mouse_offs_y;
 
-  const uint32 bg_color = view.surface->MakeColor(view.red, view.green, view.blue);
-
-  MDFN_DrawFillRect(view.surface, xx, yy, view.width, view.height, bg_color);
-  *this << static_cast<cmd_t>(Command::paint) << xx << yy << view.width << view.height << bg_color;
-  Send(Command::paint);
+  return std::pair<int, int>(xx, yy);
 }
 
-void Graffiti::Line(int& x0, int& y0, const int& x1, const int& y1)
+void Graffiti::Paint(
+  const int& x, const int& y, const uint32& w, const uint32& h,
+  const uint32& bg_color, const bool broadcast)
+{
+  MDFN_DrawFillRect(view.surface, x, y, w, h, bg_color);
+
+  if (broadcast)
+  {
+    *this << static_cast<cmd_t>(Command::paint) << x << y << w << h << bg_color;
+    Send(Command::paint);
+  }
+}
+
+void Graffiti::Line(
+  int& x0, int& y0, const int& x1, const int& y1,
+  const uint32& w, const uint32& h, const uint32& bg_color)
 {
   int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
   int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1;
   int err = (dx>dy ? dx : -dy)/2, e2;
 
   for(;;){
-    Paint(x0,y0);
+    Paint(x0, y0, w, h, bg_color, true);
     if (x0==x1 && y0==y1) break;
     e2 = err;
     if (e2 >-dx) { err -= dy; x0 += sx; }
@@ -234,7 +244,7 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool& disp
       MDFN_printf("x: %d, y: %d, w: %d, h: %d, bg_color: %d\n", x, y, w, h, bg_color);
 
       if (strcasecmp(nick, OurNick))
-        MDFN_DrawFillRect(view.surface, x, y, w, h, bg_color);
+        Paint(x, y, w, h, bg_color, false);
     }
     break;
   case Command::sync:

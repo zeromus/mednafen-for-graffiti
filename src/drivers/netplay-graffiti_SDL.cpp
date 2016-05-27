@@ -49,8 +49,9 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
     {
       MDFN_printf ("painting TRUE\n");
       painting = true;
-      view.x0 = event.button.x;
-      view.y0 = event.button.y;
+      auto xy = MouseCoords2SurfaceCoords(event.button.x, event.button.y);
+      view.x0 = xy.first;
+      view.y0 = xy.second;
 
       switch (event.button.button)
       {
@@ -65,7 +66,8 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
         view.blue = (rand() % 7 + 1) * 32;
         break;
       }
-      Paint(event.button.x, event.button.y);
+      view.bg_color = view.surface->MakeColor(view.red, view.green, view.blue);
+      Paint(xy.first, xy.second, view.width, view.height, view.bg_color, true);
     }
     break;
 
@@ -81,7 +83,8 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
     if(painting) {
       // Continue painting
       //MDFN_printf ("painting MOTION\n");
-      Line(view.x0, view.y0, event.motion.x, event.motion.y);
+      auto xy = MouseCoords2SurfaceCoords(event.button.x, event.button.y);
+      Line(view.x0, view.y0, xy.first, xy.second, view.width, view.height, view.bg_color);
     }
     break;
 
