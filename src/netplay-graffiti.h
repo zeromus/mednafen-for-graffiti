@@ -38,6 +38,8 @@ Bresenham Line algo from http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_a
 class Graffiti : public TextCommand
 {
   using scale_t = double;
+  using coord_t = uint32;
+  using wh_t = uint32;  // width/height
   using cmd_t = uint8;
   enum Command : cmd_t { paint, line, sync, clear };
   // I am using older style enum because it is easier to cast, given that I
@@ -45,7 +47,6 @@ class Graffiti : public TextCommand
   // (TextCommand class's << and >> operators)
 
 public:
-  using coord_t = uint32;
   static const CommandEntry ConsoleCommandEntry;
   static bool ConsoleCommandParser(const char *arg);
 
@@ -92,11 +93,11 @@ public:
 
 protected:
   void Paint(
-    const coord_t& x, const coord_t& y, const uint32& w, const uint32& h,
+    const coord_t& x, const coord_t& y, const wh_t& w, const wh_t& h,
     const uint32& bg_color, const bool broadcast);
   void Line(
     coord_t& x0, coord_t& y0, const coord_t& x1, const coord_t& y1,
-    const uint32& w, const uint32& h, const uint32& bg_color, const bool broadcast);
+    const wh_t& w, const wh_t& h, const uint32& bg_color, const bool broadcast);
   std::pair<coord_t, coord_t> MouseCoords2SurfaceCoords(const coord_t& x, const coord_t& y);
 
   bool painting {false};
@@ -110,7 +111,7 @@ protected:
     MDFN_Surface *surface {nullptr};
     uint8 red, green, blue;
     uint32 bg_color;
-    uint32 width {5}, height {5};
+    wh_t width {5}, height {5};
     coord_t x0 {0}, y0 {0};
     scale_t xscale {1}, yscale {1};
   } view;

@@ -129,7 +129,7 @@ std::pair<Graffiti::coord_t, Graffiti::coord_t> Graffiti::MouseCoords2SurfaceCoo
 }
 
 void Graffiti::Paint(
-  const coord_t& x, const coord_t& y, const uint32& w, const uint32& h,
+  const coord_t& x, const coord_t& y, const wh_t& w, const wh_t& h,
   const uint32& bg_color, const bool broadcast)
 {
   MDFN_DrawFillRect(view.surface, x, y, w, h, bg_color);
@@ -143,7 +143,7 @@ void Graffiti::Paint(
 
 void Graffiti::Line(
   coord_t& x0, coord_t& y0, const coord_t& x1, const coord_t& y1,
-  const uint32& w, const uint32& h, const uint32& bg_color, const bool broadcast)
+  const wh_t& w, const wh_t& h, const uint32& bg_color, const bool broadcast)
 {
   coord_t xo0 = x0, yo0 = y0;
   int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
