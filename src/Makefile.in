@@ -182,14 +182,15 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__mednafen_SOURCES_DIST = debug.cpp error.cpp mempatcher.cpp \
 	settings.cpp endian.cpp mednafen.cpp git.cpp file.cpp \
-	general.cpp memory.cpp netplay.cpp state.cpp state_rewind.cpp \
-	movie.cpp player.cpp PSFLoader.cpp SNSFLoader.cpp \
-	SPCReader.cpp tests.cpp qtrecord.cpp Stream.cpp \
-	MemoryStream.cpp FileStream.cpp IPSPatcher.cpp \
-	drivers/win-resource.rc dis6502.cpp cdrom/cdromif.cpp \
-	cdrom/scsicd.cpp cdrom/CDUtility.cpp cdrom/crc32.cpp \
-	cdrom/galois.cpp cdrom/l-ec.cpp cdrom/recover-raw.cpp \
-	cdrom/lec.cpp cdrom/CDAccess.cpp cdrom/CDAccess_Image.cpp \
+	general.cpp memory.cpp netplay.cpp netplay-text.cpp \
+	netplay-graffiti.cpp state.cpp state_rewind.cpp movie.cpp \
+	player.cpp PSFLoader.cpp SNSFLoader.cpp SPCReader.cpp \
+	tests.cpp qtrecord.cpp Stream.cpp MemoryStream.cpp \
+	FileStream.cpp IPSPatcher.cpp drivers/win-resource.rc \
+	dis6502.cpp cdrom/cdromif.cpp cdrom/scsicd.cpp \
+	cdrom/CDUtility.cpp cdrom/crc32.cpp cdrom/galois.cpp \
+	cdrom/l-ec.cpp cdrom/recover-raw.cpp cdrom/lec.cpp \
+	cdrom/CDAccess.cpp cdrom/CDAccess_Image.cpp \
 	cdrom/CDAccess_CCD.cpp cdrom/CDAFReader.cpp \
 	cdrom/CDAFReader_Vorbis.cpp cdrom/CDAFReader_MPC.cpp \
 	cdrom/CDAFReader_SF.cpp compress/minilzo.c compress/ioapi.c \
@@ -213,6 +214,7 @@ am_mednafen_OBJECTS = debug.$(OBJEXT) error.$(OBJEXT) \
 	mempatcher.$(OBJEXT) settings.$(OBJEXT) endian.$(OBJEXT) \
 	mednafen.$(OBJEXT) git.$(OBJEXT) file.$(OBJEXT) \
 	general.$(OBJEXT) memory.$(OBJEXT) netplay.$(OBJEXT) \
+	netplay-text.$(OBJEXT) netplay-graffiti.$(OBJEXT) \
 	state.$(OBJEXT) state_rewind.$(OBJEXT) movie.$(OBJEXT) \
 	player.$(OBJEXT) PSFLoader.$(OBJEXT) SNSFLoader.$(OBJEXT) \
 	SPCReader.$(OBJEXT) tests.$(OBJEXT) qtrecord.$(OBJEXT) \
@@ -578,17 +580,18 @@ AUTOMAKE_OPTIONS = subdir-objects
 DEFAULT_INCLUDES = -I$(top_builddir)/include -I$(top_srcdir)/include -I$(top_srcdir)/intl
 mednafen_SOURCES = debug.cpp error.cpp mempatcher.cpp settings.cpp \
 	endian.cpp mednafen.cpp git.cpp file.cpp general.cpp \
-	memory.cpp netplay.cpp state.cpp state_rewind.cpp movie.cpp \
-	player.cpp PSFLoader.cpp SNSFLoader.cpp SPCReader.cpp \
-	tests.cpp qtrecord.cpp Stream.cpp MemoryStream.cpp \
-	FileStream.cpp IPSPatcher.cpp $(am__append_4) $(am__append_9) \
-	cdrom/cdromif.cpp cdrom/scsicd.cpp cdrom/CDUtility.cpp \
-	cdrom/crc32.cpp cdrom/galois.cpp cdrom/l-ec.cpp \
-	cdrom/recover-raw.cpp cdrom/lec.cpp cdrom/CDAccess.cpp \
-	cdrom/CDAccess_Image.cpp cdrom/CDAccess_CCD.cpp \
-	cdrom/CDAFReader.cpp cdrom/CDAFReader_Vorbis.cpp \
-	cdrom/CDAFReader_MPC.cpp $(am__append_58) compress/minilzo.c \
-	compress/ioapi.c compress/unzip.c compress/GZFileStream.cpp \
+	memory.cpp netplay.cpp netplay-text.cpp netplay-graffiti.cpp \
+	state.cpp state_rewind.cpp movie.cpp player.cpp PSFLoader.cpp \
+	SNSFLoader.cpp SPCReader.cpp tests.cpp qtrecord.cpp Stream.cpp \
+	MemoryStream.cpp FileStream.cpp IPSPatcher.cpp $(am__append_4) \
+	$(am__append_9) cdrom/cdromif.cpp cdrom/scsicd.cpp \
+	cdrom/CDUtility.cpp cdrom/crc32.cpp cdrom/galois.cpp \
+	cdrom/l-ec.cpp cdrom/recover-raw.cpp cdrom/lec.cpp \
+	cdrom/CDAccess.cpp cdrom/CDAccess_Image.cpp \
+	cdrom/CDAccess_CCD.cpp cdrom/CDAFReader.cpp \
+	cdrom/CDAFReader_Vorbis.cpp cdrom/CDAFReader_MPC.cpp \
+	$(am__append_58) compress/minilzo.c compress/ioapi.c \
+	compress/unzip.c compress/GZFileStream.cpp \
 	compress/ZLInflateFilter.cpp hash/md5.cpp hash/sha1.cpp \
 	hash/sha256.cpp string/escape.cpp string/trim.cpp \
 	string/ConvertUTF.cpp video/surface.cpp video/font-data.cpp \
@@ -873,6 +876,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mempatcher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/movie.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netplay-graffiti.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netplay-text.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netplay.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/player.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/qtrecord.Po@am__quote@

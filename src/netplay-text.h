@@ -1,9 +1,14 @@
 #pragma once
 
+#include "mednafen.h"
+#include "netplay.h"
+#include "netplay-driver.h"
+#include <zlib.h>
+
 class TextCommand
 {
 public:
-  using magic_t = uint16_t;
+  using magic_t = uint16;
   
   struct Registration {
   public:

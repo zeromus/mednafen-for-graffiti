@@ -41,6 +41,10 @@
 
 #include "driver.h"
 
+// netplay extensions
+#include "netplay-graffiti.h"
+extern Graffiti *graffiti;
+
 int MDFNnetplay=0;
 
 static std::map<std::string, uint32> PlayersList;
@@ -59,10 +63,6 @@ static bool StateLoaded;	// Set to true/false in Netplay_Update() call paths, us
 
 static std::unique_ptr<uint8[]> incoming_buffer;	// TotalInputStateSize + 1
 static std::unique_ptr<uint8[]> outgoing_buffer;	// 1 + LocalInputStateSize + 4
-
-// extensions
-#include "netplay-graffiti.h"
-extern Graffiti *graffiti;
 
 static void RebuildPortVtoVMap(const uint32 PortDevIdx[])
 {

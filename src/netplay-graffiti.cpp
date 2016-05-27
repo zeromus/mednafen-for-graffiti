@@ -119,13 +119,10 @@ bool Graffiti::Broadcast()
   if(!enabled)
     return false;
 
-  printf("BROADCASTING\n");
+  MDFN_printf("BROADCASTING\n");
   // compress and send view.surface
   std::vector<uint8> cbuf;
   uLongf clen;
-
-  for (int i=0; i < 24; i++)
-    printf("0x%02x ", static_cast<unsigned char>(view.canvas->pixels[i]));
 
   fflush(stdout);
 
@@ -137,14 +134,14 @@ bool Graffiti::Broadcast()
   MDFN_en32lsb(&cbuf[0], view.canvas->Size());
   compress2((Bytef *)&cbuf[0] + 4, &clen, (Bytef *)view.canvas->pixels, view.canvas->Size(), 7);
 
-  fprintf(stderr, "Clen = %d", clen);
+  MDFN_printf("Clen = %d", clen);
   // WARNING INEFFICIENT - just to see if it works first
   // ideally cbuf should be the istr to begin with (resized and at the proper index)
   cbuf.resize(clen + 4);
   for (auto i : cbuf)
     *this << i;
 
-  printf("canvas size: %d\n", view.canvas->Size());
+  MDFN_printf("canvas size: %d\n", view.canvas->Size());
 
   Send(Command::sync);
   return true;
@@ -169,9 +166,9 @@ extern MDFNGI *CurGame;
 
 void Graffiti::Paint(const int& x, const int& y)
 {
-  printf("x: %d, y: %d\n", x, y);
-  printf("sx: %f, ox: %f\n", CurGame->mouse_scale_x, CurGame->mouse_offs_x);
-  printf("sy: %f, oy: %f\n", CurGame->mouse_scale_y, CurGame->mouse_offs_y);
+  MDFN_printf("x: %d, y: %d\n", x, y);
+  MDFN_printf("sx: %f, ox: %f\n", CurGame->mouse_scale_x, CurGame->mouse_offs_x);
+  MDFN_printf("sy: %f, oy: %f\n", CurGame->mouse_scale_y, CurGame->mouse_offs_y);
   // WARNING mouse_scale_x and mouse_offs_x UNTESTED
   scale_t mouse_scale_x = CurGame->mouse_scale_x ? CurGame->mouse_scale_x : 1.0;
   scale_t mouse_scale_y = CurGame->mouse_scale_y ? CurGame->mouse_scale_y : 1.0;
@@ -235,7 +232,7 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &disp
       LoadPacket(&msg[0], len);
       uint32 x,y,w,h,bg_color;
       *this >> x >> y >> w >> h >> bg_color;
-      std::cout << "x: " << x << "y: " << y << "w: " << w << "h: " << h << "bg: " << bg_color << std::endl;
+      MDFN_printf("x: %d, y: %d, w: %d, h: %d, bg_color: %d\n", x, y, w, h, bg_color);
 
       if (strcasecmp(nick, OurNick))
         MDFN_DrawFillRect(view.canvas, x, y, w, h, bg_color);
@@ -246,9 +243,9 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &disp
       // TODO: download / decompress / load surface data
       if (!strcasecmp(nick, OurNick))
         break;
-      fprintf (stderr, "SYNC RECEIVED\n");
+      MDFN_printf("SYNC RECEIVED\n");
       for (int i=0; i < 24; i++)
-        printf("0x%02x ", static_cast<unsigned char>(msg[i]));
+        MDFN_printf("0x%02x ", static_cast<unsigned char>(msg[i]));
 
       RecvSync(msg, len);
     }
@@ -267,7 +264,7 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool &disp
 void Graffiti::RecvSync(const char *msg, uint32 len)
 {
   uLongf dlen = MDFN_de32lsb(&msg[0]);
-  printf ("dlen = %d\n", dlen);
+  MDFN_printf("dlen = %d\n", dlen);
   if(len > view.canvas->Size()) // Uncompressed length sanity check - 1 MiB max.
   {
     throw MDFN_Error(0, _("Uncompressed save state data is too large: %llu"), (unsigned long long)len);
