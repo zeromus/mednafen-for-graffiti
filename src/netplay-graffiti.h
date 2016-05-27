@@ -50,33 +50,42 @@ class Graffiti : public TextCommand
 public:
   static const CommandEntry ConsoleCommandEntry;
   static bool ConsoleCommandParser(const char *arg);
-
-  Graffiti(MDFN_Surface *new_surface);
-  ~Graffiti();
-
-  // the main operating points (MOP)
-  // user input draws to an internal-surface
-  // Input_Event function defined in drivers/netplay-graffiti_SDL
-  // which gets blitted to the pre-scaled main-surface
-  void Blit(MDFN_Surface *target);
-  // the server-designated user automatically runs this function to broadcast
-  // their surface to the other players (a part of the State-Loading paradigm)
-  bool Broadcast(); // returns true if actually broadcasted (ie when module enabled)
-
   bool ParseConsoleCommand(const char *msg);
 
-  // init the object with this function as soon as possible
+  /* takes in a new surface, which we must personally delete. Normally, I would
+  not be a fan of allocating the surface outside of the constructor, but it
+  actually simplifies the code by not requiring to maintain a separate copy of
+  MDFN_Surface constructor arguments */
+  Graffiti(MDFN_Surface *new_surface);
+
+  /* I would have preferred this next function as part of the constructor,
+  but given the segregated nature of mednafen's video init code, it had to be
+  separated.
+
+  This class assumes that SetScale has been called appropriately before
+  any drawing routines are called */
   void SetScale(const scale_t& x, const scale_t& y);
 
-  // Enabling refers to whether the module is allowed to receive TextCommands
-  // and has been extended to include main operating points (MOP).
-  /* Normally, the MOP should not operate if this module is disabled. However,
+  // the main operating points (MOP)
+  // A) user input draws to an internal surface
+  // Input_Event() defined in driver (eg. drivers/netplay-graffiti_SDL)
+
+  // B) internal surface gets blitted to the pre-scaled gameplay-surface
+  void Blit(MDFN_Surface *target);
+
+  /* C) as part of the State-Loading paradigm, the user who receives a state request
+  automatically broadcasts their surface to all other players */
+  bool Broadcast(); // returns true if actually broadcasted (ie when module enabled)
+
+  // Enable() refers to whether the module is allowed to receive TextCommands
+  // and conditionally affects the main operating points (MOP).
+  /* Normally, the MOP should not function if this module is disabled. However,
   I have deemed it best practice to keep the module enabled even when the user
-  chooses to disable it (via the console), so that the surface can continue to
+  chooses to disable it (via `/g disable`), so that the surface can continue to
   stay in sync. That way a user who later chooses to re-enable graffiti during
   the session is already in sync, thus avoiding the need to implement 
-  more complicated communications protocol to "sync" from outside of a
-  "REQUEST_STATE/LOADSTATE" combo event, which is currently the only way to sync.
+  more complicated communications protocol to "sync" from outside of a regular
+  "REQUEST_STATE/LOADSTATE" combo event.
   */
   // For this reason, I have added a higher layer called "Activation", allowing
   // the module to be enabled but not "activated" allows fine-grained control.
@@ -93,13 +102,17 @@ public:
   void Send(Command command);
 
 protected:
+  // Call from driver mouse-capture routine
+  std::pair<coord_t, coord_t> MouseCoords2SurfaceCoords(
+    const coord_t& x, const coord_t& y);
+
+  // All drawing routines expect surface coordinates (not raw mouse coords)
   void Paint(
     const coord_t& x, const coord_t& y, const wh_t& w, const wh_t& h,
     const uint32& bg_color, const bool broadcast);
   void Line(
     coord_t& x0, coord_t& y0, const coord_t& x1, const coord_t& y1,
     const wh_t& w, const wh_t& h, const uint32& bg_color, const bool broadcast);
-  std::pair<coord_t, coord_t> MouseCoords2SurfaceCoords(const coord_t& x, const coord_t& y);
 
   bool painting {false};
   bool active {false};
@@ -114,13 +127,13 @@ protected:
     color_t bg_color;
     wh_t width {5}, height {5};
     coord_t x0 {0}, y0 {0};
-    scale_t xscale {1}, yscale {1};
+    // default of 0 to assist in noticing whether SetScale was called in time
+    scale_t xscale {0}, yscale {0};
   } view;
 
 private:
   virtual void ShowCursor(bool s=true)=0;
   bool Process(const char *nick, const char *msg, uint32 len, bool &display);
-  void RecvSync(const char *msg, uint32 len);
 };
 
 #endif
