@@ -17,7 +17,8 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
   }
   /* Hack to disallow a "focus-click" to act as a paint event */
   /* tested on: Linux only */
-  static bool ignore {false}; // set true means ignore the following event
+  // set true means ignore the event NEXT time this function is called
+  static bool ignore {false};
   if (ignore)
   {
     ignore = false;
@@ -48,12 +49,23 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
     {
       MDFN_printf ("painting TRUE\n");
       painting = true;
-      view.red = (rand() % 8) * 32;
-      view.green = (rand() % 8) * 32;
-      view.blue = (rand() % 8) * 32;
-      Paint(event.button.x, event.button.y);
       view.x0 = event.button.x;
       view.y0 = event.button.y;
+
+      switch (event.button.button)
+      {
+      case SDL_BUTTON_RIGHT:  // eraser
+        view.red = 0;
+        view.green = 0;
+        view.blue = 0;
+        break;
+      default:
+        view.red = (rand() % 8) * 32;
+        view.green = (rand() % 8) * 32;
+        view.blue = (rand() % 8) * 32;
+        break;
+      }
+      Paint(event.button.x, event.button.y);
     }
     break;
 
