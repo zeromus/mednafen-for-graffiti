@@ -11,22 +11,32 @@ void Graffiti_SDL::ShowCursor(bool s)
 void Graffiti_SDL::Input_Event(const SDL_Event& event)
 {
   if(!enabled || !active)
+  {
+    //MDFN_printf("RETURNING\n");
     return;
-
+  }
   /* Hack to disallow a "focus-click" to act as a paint event */
-  static SDL_Event last {};
-  switch(last.type)
+  /* tested on: Linux only */
+  static bool ignore {false}; // set true means ignore the following event
+  if (ignore)
+  {
+    ignore = false;
+    return;
+  }
+
+  switch(event.type)
   {
   case SDL_USEREVENT:
-    switch(last.user.code)
+    switch(event.user.code)
     {
     case CEVT_SET_INPUT_FOCUS:
-      last = event;
+      ignore = true;
+      MDFN_printf("CEVT_SET_INPUT_FOCUS event\n");
       return;
+    default:
+      break;
     }
-    break;
   default:
-    last = event;
     break;
   }
   /* End Hack */
@@ -36,7 +46,7 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
   case SDL_MOUSEBUTTONDOWN:
     if(event.button.state == SDL_PRESSED)
     {
-      //printf ("painting TRUE\n");
+      MDFN_printf ("painting TRUE\n");
       painting = true;
       view.red = (rand() % 8) * 32;
       view.green = (rand() % 8) * 32;
@@ -50,7 +60,7 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
   case SDL_MOUSEBUTTONUP:
     if(event.button.state == SDL_RELEASED)
     {
-      //printf ("painting FALSE\n");
+      //MDFN_printf ("painting FALSE\n");
       painting = false;
     }
     break;
@@ -58,7 +68,7 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
   case SDL_MOUSEMOTION:
     if(painting) {
       // Continue painting
-      //printf ("painting MOTION\n");
+      //MDFN_printf ("painting MOTION\n");
       Line(view.x0, view.y0, event.motion.x, event.motion.y);
     }
     break;
