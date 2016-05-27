@@ -84,7 +84,7 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
       // Continue painting
       //MDFN_printf ("painting MOTION\n");
       auto xy = MouseCoords2SurfaceCoords(event.button.x, event.button.y);
-      Line(view.x0, view.y0, xy.first, xy.second, view.width, view.height, view.bg_color);
+      Line(view.x0, view.y0, xy.first, xy.second, view.width, view.height, view.bg_color, true);
     }
     break;
 

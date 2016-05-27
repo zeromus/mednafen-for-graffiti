@@ -113,7 +113,7 @@ void Graffiti::Blit(MDFN_Surface *target)
 }
 
 extern MDFNGI *CurGame;
-std::pair<int, int> Graffiti::MouseCoords2SurfaceCoords(const int& x, const int& y)
+std::pair<Graffiti::coord_t, Graffiti::coord_t> Graffiti::MouseCoords2SurfaceCoords(const coord_t& x, const coord_t& y)
 {
   MDFN_printf("x: %d, y: %d\n", x, y);
   MDFN_printf("sx: %f, ox: %f\n", CurGame->mouse_scale_x, CurGame->mouse_offs_x);
@@ -121,15 +121,15 @@ std::pair<int, int> Graffiti::MouseCoords2SurfaceCoords(const int& x, const int&
   // WARNING mouse_scale_x and mouse_offs_x UNTESTED
   scale_t mouse_scale_x = CurGame->mouse_scale_x ? CurGame->mouse_scale_x : 1.0;
   scale_t mouse_scale_y = CurGame->mouse_scale_y ? CurGame->mouse_scale_y : 1.0;
-  int xx = (x / view.xscale) * mouse_scale_x + CurGame->mouse_offs_x;
+  coord_t xx = (x / view.xscale) * mouse_scale_x + CurGame->mouse_offs_x;
   // WARNING mouse_scale_y untested
-  int yy = (y / view.yscale) * mouse_scale_y + CurGame->mouse_offs_y;
+  coord_t yy = (y / view.yscale) * mouse_scale_y + CurGame->mouse_offs_y;
 
-  return std::pair<int, int>(xx, yy);
+  return std::pair<coord_t, coord_t>(xx, yy);
 }
 
 void Graffiti::Paint(
-  const int& x, const int& y, const uint32& w, const uint32& h,
+  const coord_t& x, const coord_t& y, const uint32& w, const uint32& h,
   const uint32& bg_color, const bool broadcast)
 {
   MDFN_DrawFillRect(view.surface, x, y, w, h, bg_color);
@@ -142,19 +142,26 @@ void Graffiti::Paint(
 }
 
 void Graffiti::Line(
-  int& x0, int& y0, const int& x1, const int& y1,
-  const uint32& w, const uint32& h, const uint32& bg_color)
+  coord_t& x0, coord_t& y0, const coord_t& x1, const coord_t& y1,
+  const uint32& w, const uint32& h, const uint32& bg_color, const bool broadcast)
 {
+  coord_t xo0 = x0, yo0 = y0;
   int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
   int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1;
   int err = (dx>dy ? dx : -dy)/2, e2;
 
   for(;;){
-    Paint(x0, y0, w, h, bg_color, true);
+    Paint(x0, y0, w, h, bg_color, false);
     if (x0==x1 && y0==y1) break;
     e2 = err;
     if (e2 >-dx) { err -= dy; x0 += sx; }
     if (e2 < dy) { err += dx; y0 += sy; }
+  }
+
+  if (broadcast)
+  {
+    *this << static_cast<cmd_t>(Command::line) << xo0 << yo0 << x1 << y1 << w << h << bg_color;
+    Send(Command::line);
   }
 
   x0 = x1;
@@ -169,6 +176,8 @@ void Graffiti::Send(Command command)
     *this << static_cast<cmd_t>(Command::clear);
     break;
   case Command::paint:
+    break;
+  case Command::line:
     break;
   case Command::sync:
     {
@@ -195,12 +204,25 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool& disp
   case Command::paint:
     {
       LoadPacket(&msg[0], len);
-      uint32 x,y,w,h,bg_color;
+      uint32 x, y, w, h, bg_color;
       *this >> x >> y >> w >> h >> bg_color;
-      MDFN_printf("x: %d, y: %d, w: %d, h: %d, bg_color: %d\n", x, y, w, h, bg_color);
+      //MDFN_printf("PAINT: x: %d, y: %d, w: %d, h: %d, bg_color: %d\n", x, y, w, h, bg_color);
 
       if (strcasecmp(nick, OurNick))
         Paint(x, y, w, h, bg_color, false);
+    }
+    break;
+  case Command::line:
+    {
+      LoadPacket(&msg[0], len);
+      uint32 x0, y0, x1, y1, w, h, bg_color;
+      *this >> x0 >> y0 >> x1 >> y1 >> w >> h >> bg_color;
+      // MDFN_printf(
+      //   "LINE: x0: %d, y0: %d, x1: %d, y1: %d, w: %d, h: %d, bg_color: %d\n",
+      //   x0, y0, x1, y1, w, h, bg_color);
+
+      if (strcasecmp(nick, OurNick))
+        Line(x0, y0, x1, y1, w, h, bg_color, false);
     }
     break;
   case Command::sync:

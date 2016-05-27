@@ -39,12 +39,13 @@ class Graffiti : public TextCommand
 {
   using scale_t = double;
   using cmd_t = uint8;
-  enum Command : cmd_t { paint, sync, clear };
+  enum Command : cmd_t { paint, line, sync, clear };
   // I am using older style enum because it is easier to cast, given that I
   // cast to/from this enum through template functions...
   // (TextCommand class's << and >> operators)
 
 public:
+  using coord_t = uint32;
   static const CommandEntry ConsoleCommandEntry;
   static bool ConsoleCommandParser(const char *arg);
 
@@ -91,12 +92,12 @@ public:
 
 protected:
   void Paint(
-    const int& x, const int& y, const uint32& w, const uint32& h,
+    const coord_t& x, const coord_t& y, const uint32& w, const uint32& h,
     const uint32& bg_color, const bool broadcast);
   void Line(
-    int& x0, int& y0, const int& x1, const int& y1,
-    const uint32& w, const uint32& h, const uint32& bg_color);
-  std::pair<int, int> MouseCoords2SurfaceCoords(const int& x, const int& y);
+    coord_t& x0, coord_t& y0, const coord_t& x1, const coord_t& y1,
+    const uint32& w, const uint32& h, const uint32& bg_color, const bool broadcast);
+  std::pair<coord_t, coord_t> MouseCoords2SurfaceCoords(const coord_t& x, const coord_t& y);
 
   bool painting {false};
   bool active {false};
@@ -110,7 +111,7 @@ protected:
     uint8 red, green, blue;
     uint32 bg_color;
     uint32 width {5}, height {5};
-    int x0 {0}, y0 {0};
+    coord_t x0 {0}, y0 {0};
     scale_t xscale {1}, yscale {1};
   } view;
 
