@@ -105,6 +105,7 @@ protected:
     View(MDFN_Surface *new_surface);
     ~View();
     void Clear();
+    std::vector<uint8> Compress();
     MDFN_Surface *surface {nullptr};
     uint8 red, green, blue;
     uint32 bg_color;

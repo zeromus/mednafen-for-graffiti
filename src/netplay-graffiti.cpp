@@ -20,34 +20,6 @@ Graffiti::Graffiti(MDFN_Surface *new_surface) :
 {
 }
 
-
-Graffiti::View::View(MDFN_Surface *new_surface)
-{
-  if (surface)
-  {
-    delete surface;
-  }
-
-  surface = new_surface;
-  surface->Fill(0, 0, 0, 0);
-}
-
-Graffiti::View::~View()
-{
-  if (surface)
-  {
-    delete surface;
-    surface = nullptr;
-  }
-}
-
-void Graffiti::View::Clear()
-{
-  if (surface)
-  {
-    surface->Fill(0,0,0,0);
-  }
-}
 ///////////////
 bool Graffiti::ParseConsoleCommand(const char *arg)
 {
@@ -120,28 +92,6 @@ bool Graffiti::Broadcast()
     return false;
 
   MDFN_printf("BROADCASTING\n");
-  // compress and send view.surface
-  std::vector<uint8> cbuf;
-  uLongf clen;
-
-  fflush(stdout);
-
-  *this << static_cast<cmd_t>(Command::sync);
-
-  // TODO / WARNING -- this relies on all client surfaces using the same BPP
-  clen = view.surface->Size() + view.surface->Size() / 1000 + 12;
-  cbuf.resize(4 + clen);
-  MDFN_en32lsb(&cbuf[0], view.surface->Size());
-  compress2((Bytef *)&cbuf[0] + 4, &clen, (Bytef *)view.surface->pixels, view.surface->Size(), 7);
-
-  MDFN_printf("Clen = %d", clen);
-  // WARNING INEFFICIENT - just to see if it works first
-  // ideally cbuf should be the istr to begin with (resized and at the proper index)
-  cbuf.resize(clen + 4);
-  for (auto i : cbuf)
-    *this << i;
-
-  //MDFN_printf("surface size: %d\n", view.surface->Size());
 
   Send(Command::sync);
   return true;
@@ -221,6 +171,12 @@ void Graffiti::Send(Command command)
   case Command::paint:
     break;
   case Command::sync:
+    {
+      *this << static_cast<cmd_t>(Command::sync);
+
+      for (auto i : view.Compress())
+        *this << i;
+    }
     break;
   }
   TextCommand::Send();
@@ -275,4 +231,51 @@ void Graffiti::RecvSync(const char *msg, uint32 len)
   }
 
   uncompress((Bytef *)view.surface->pixels, &dlen, (Bytef *)&msg[4], len - 4);
+}
+
+/////////////////////////////
+Graffiti::View::View(MDFN_Surface *new_surface)
+{
+  if (surface)
+  {
+    delete surface;
+  }
+
+  surface = new_surface;
+  surface->Fill(0, 0, 0, 0);
+}
+
+Graffiti::View::~View()
+{
+  if (surface)
+  {
+    delete surface;
+    surface = nullptr;
+  }
+}
+
+void Graffiti::View::Clear()
+{
+  if (surface)
+  {
+    surface->Fill(0,0,0,0);
+  }
+}
+
+std::vector<uint8> Graffiti::View::Compress()
+{
+  std::vector<uint8> cbuf;
+  uLongf clen;
+
+  // TODO / WARNING -- this relies on all client surfaces using the same BPP
+  clen = surface->Size() + surface->Size() / 1000 + 12;
+  cbuf.resize(4 + clen);
+  MDFN_en32lsb(&cbuf[0], surface->Size());
+  compress2((Bytef *)&cbuf[0] + 4, &clen, (Bytef *)surface->pixels, surface->Size(), 7);
+
+  MDFN_printf("Clen = %d", clen);
+  // WARNING INEFFICIENT - just to see if it works first
+  // ideally cbuf should be the istr to begin with (resized and at the proper index)
+  cbuf.resize(clen + 4);
+  return cbuf;
 }
