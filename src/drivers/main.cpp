@@ -60,9 +60,9 @@
 #include <mednafen/qtrecord.h>
 #include <math.h>
 
-#include "netplay-graffiti.h"
+#include "netplay-graffiti_SDL.h"
 Graffiti *graffiti {nullptr};
-GraffitiDriver *graffiti_driver {nullptr};
+Graffiti_SDL *graffiti_sdl {nullptr};
 
 JoystickManager *joy_manager = NULL;
 bool MDFNDHaveFocus;
@@ -1152,7 +1152,7 @@ static void GameThread_HandleEvents(void)
 
   Input_Event(event);
 #ifdef ENABLE_GRAFFITI
-  graffiti_driver->Input_Event(*event);
+  graffiti_sdl->Input_Event(*event);
 #endif
 
   if(Debugger_IsActive())
@@ -1829,8 +1829,8 @@ for(int zgi = 1; zgi < argc; zgi++)// start game load test loop
 #ifdef ENABLE_GRAFFITI
     printf ("nominal_width == %d, nominal_height = %d\n", CurGame->nominal_width, CurGame->nominal_height);
     printf ("fb_width == %d, fb_height = %d\n", CurGame->fb_width, CurGame->fb_height);
-    graffiti_driver = new GraffitiDriver(new MDFN_Surface(NULL, CurGame->fb_width, CurGame->fb_height, pitch32, nf));
-    graffiti = graffiti_driver;
+    graffiti_sdl = new Graffiti_SDL(new MDFN_Surface(NULL, CurGame->fb_width, CurGame->fb_height, pitch32, nf));
+    graffiti = graffiti_sdl;
 #endif
          for(int i = 0; i < 2; i++)
 	 {

@@ -1,14 +1,14 @@
-#include "netplay-graffiti.h"
+#include "netplay-graffiti_SDL.h"
 
-GraffitiDriver::GraffitiDriver(MDFN_Surface *new_canvas) :Graffiti(new_canvas)
+Graffiti_SDL::Graffiti_SDL(MDFN_Surface *new_canvas) :Graffiti(new_canvas)
 {}
 
-void GraffitiDriver::ShowCursor(bool s)
+void Graffiti_SDL::ShowCursor(bool s)
 {
   SDL_MDFN_ShowCursor(s);
 }
 
-void GraffitiDriver::Input_Event(const SDL_Event& event)
+void Graffiti_SDL::Input_Event(const SDL_Event& event)
 {
   if(!enabled || !active)
     return;

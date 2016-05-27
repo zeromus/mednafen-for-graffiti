@@ -49,7 +49,7 @@
 #include "2xSaI.h"
 #endif
 
-#include "netplay-graffiti.h"
+#include "../netplay-graffiti.h"
 extern Graffiti *graffiti;
 
 class SDL_to_MDFN_Surface_Wrapper : public MDFN_Surface
