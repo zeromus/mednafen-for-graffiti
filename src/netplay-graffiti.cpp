@@ -80,26 +80,26 @@ void Graffiti::Enable(bool e)
 {
   active = e;
   TextCommand::Enable(e);
-  SDL_MDFN_ShowCursor(e);
+  ShowCursor(e);
 }
 
 void Graffiti::Disable()
 {
   active = false;
   TextCommand::Disable();
-  SDL_MDFN_ShowCursor(0);
+  ShowCursor(0);
   ClearLocalSurface();
 }
 
 void Graffiti::Activate(bool e)
 {
-  SDL_MDFN_ShowCursor(e);
+  ShowCursor(e);
   active = e;
 }
 
 void Graffiti::Deactivate()
 {
-  SDL_MDFN_ShowCursor(0);
+  ShowCursor(0);
   active = false;
 }
 
@@ -165,64 +165,7 @@ void Graffiti::Blit(MDFN_Surface *target)
       target_pixels[i] = canvas_pixels[i];
 }
 
-void Graffiti::Input_Event(const SDL_Event &event)
-{
-  if(!enabled || !active)
-    return;
-
-  /* Hack to disallow a "focus-click" to act as a paint event */
-  static SDL_Event last {};
-  switch(last.type)
-  {
-  case SDL_USEREVENT:
-    switch(last.user.code)
-    {
-    case CEVT_SET_INPUT_FOCUS:
-      last = event;
-      return;
-    }
-    break;
-  default:
-    last = event;
-    break;
-  }
-  /* End Hack */
-
-  switch(event.type)
-  {
-  case SDL_MOUSEBUTTONDOWN:
-    if(event.button.state == SDL_PRESSED)
-    {
-      //printf ("painting TRUE\n");
-      painting = true;
-      view.red = (rand() % 8) * 32;
-      view.green = (rand() % 8) * 32;
-      view.blue = (rand() % 8) * 32;
-      Paint(event.button.x, event.button.y);
-      view.x0 = event.button.x;
-      view.y0 = event.button.y;
-    }
-    break;
-
-  case SDL_MOUSEBUTTONUP:
-    if(event.button.state == SDL_RELEASED)
-    {
-      //printf ("painting FALSE\n");
-      painting = false;
-    }
-    break;
-
-  case SDL_MOUSEMOTION:
-    if(painting) {
-      // Continue painting
-      //printf ("painting MOTION\n");
-      Line(view.x0, view.y0, event.motion.x, event.motion.y);
-    }
-    break;
-
-    default:break;
-  }
-}
+extern MDFNGI *CurGame;
 
 void Graffiti::Paint(const int& x, const int& y)
 {

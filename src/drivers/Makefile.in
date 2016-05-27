@@ -127,15 +127,16 @@ am__v_AR_1 =
 libmdfnsdl_a_AR = $(AR) $(ARFLAGS)
 libmdfnsdl_a_LIBADD =
 am__libmdfnsdl_a_SOURCES_DIST = main.cpp input.cpp args.cpp help.cpp \
-	ers.cpp sound.cpp netplay.cpp input-config.cpp console.cpp \
-	cheat.cpp fps.cpp video-state.cpp remote.cpp rmdui.cpp \
-	opengl.cpp shader.cpp overlay.cpp video.cpp nongl.cpp nnx.cpp \
-	thread_win32.cpp thread_sdl.cpp hqxx-common.cpp hq2x.cpp \
-	hq3x.cpp hq4x.cpp scale2x.c scale3x.c scalebit.c 2xSaI.cpp \
-	Joystick.cpp Joystick_SDL.cpp Joystick_Linux.cpp \
-	NetClient_POSIX.cpp Joystick_XInput.cpp Joystick_DX5.cpp \
-	NetClient_WS2.cpp debugger.cpp gfxdebugger.cpp memdebugger.cpp \
-	logdebugger.cpp prompt.cpp
+	ers.cpp sound.cpp input-config.cpp netplay.cpp \
+	netplay-graffiti.cpp console.cpp cheat.cpp fps.cpp \
+	video-state.cpp remote.cpp rmdui.cpp opengl.cpp shader.cpp \
+	overlay.cpp video.cpp nongl.cpp nnx.cpp thread_win32.cpp \
+	thread_sdl.cpp hqxx-common.cpp hq2x.cpp hq3x.cpp hq4x.cpp \
+	scale2x.c scale3x.c scalebit.c 2xSaI.cpp Joystick.cpp \
+	Joystick_SDL.cpp Joystick_Linux.cpp NetClient_POSIX.cpp \
+	Joystick_XInput.cpp Joystick_DX5.cpp NetClient_WS2.cpp \
+	debugger.cpp gfxdebugger.cpp memdebugger.cpp logdebugger.cpp \
+	prompt.cpp
 @WIN32_TRUE@am__objects_1 = thread_win32.$(OBJEXT)
 @WIN32_FALSE@am__objects_2 = thread_sdl.$(OBJEXT)
 @WANT_FANCY_SCALERS_TRUE@am__objects_3 = hqxx-common.$(OBJEXT) \
@@ -153,14 +154,15 @@ am__libmdfnsdl_a_SOURCES_DIST = main.cpp input.cpp args.cpp help.cpp \
 @WANT_DEBUGGER_TRUE@	logdebugger.$(OBJEXT) prompt.$(OBJEXT)
 am_libmdfnsdl_a_OBJECTS = main.$(OBJEXT) input.$(OBJEXT) \
 	args.$(OBJEXT) help.$(OBJEXT) ers.$(OBJEXT) sound.$(OBJEXT) \
-	netplay.$(OBJEXT) input-config.$(OBJEXT) console.$(OBJEXT) \
-	cheat.$(OBJEXT) fps.$(OBJEXT) video-state.$(OBJEXT) \
-	remote.$(OBJEXT) rmdui.$(OBJEXT) opengl.$(OBJEXT) \
-	shader.$(OBJEXT) overlay.$(OBJEXT) video.$(OBJEXT) \
-	nongl.$(OBJEXT) nnx.$(OBJEXT) $(am__objects_1) \
-	$(am__objects_2) $(am__objects_3) Joystick.$(OBJEXT) \
-	Joystick_SDL.$(OBJEXT) $(am__objects_4) $(am__objects_5) \
-	$(am__objects_6) $(am__objects_7)
+	input-config.$(OBJEXT) netplay.$(OBJEXT) \
+	netplay-graffiti.$(OBJEXT) console.$(OBJEXT) cheat.$(OBJEXT) \
+	fps.$(OBJEXT) video-state.$(OBJEXT) remote.$(OBJEXT) \
+	rmdui.$(OBJEXT) opengl.$(OBJEXT) shader.$(OBJEXT) \
+	overlay.$(OBJEXT) video.$(OBJEXT) nongl.$(OBJEXT) \
+	nnx.$(OBJEXT) $(am__objects_1) $(am__objects_2) \
+	$(am__objects_3) Joystick.$(OBJEXT) Joystick_SDL.$(OBJEXT) \
+	$(am__objects_4) $(am__objects_5) $(am__objects_6) \
+	$(am__objects_7)
 libmdfnsdl_a_OBJECTS = $(am_libmdfnsdl_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -446,12 +448,12 @@ AUTOMAKE_OPTIONS = subdir-objects
 DEFAULT_INCLUDES = -I$(top_builddir)/include -I$(top_srcdir)/include -I$(top_srcdir)/intl
 noinst_LIBRARIES = libmdfnsdl.a
 libmdfnsdl_a_SOURCES = main.cpp input.cpp args.cpp help.cpp ers.cpp \
-	sound.cpp netplay.cpp input-config.cpp console.cpp cheat.cpp \
-	fps.cpp video-state.cpp remote.cpp rmdui.cpp opengl.cpp \
-	shader.cpp overlay.cpp video.cpp nongl.cpp nnx.cpp \
-	$(am__append_1) $(am__append_2) $(am__append_3) Joystick.cpp \
-	Joystick_SDL.cpp $(am__append_4) $(am__append_5) \
-	$(am__append_6) $(am__append_7)
+	sound.cpp input-config.cpp netplay.cpp netplay-graffiti.cpp \
+	console.cpp cheat.cpp fps.cpp video-state.cpp remote.cpp \
+	rmdui.cpp opengl.cpp shader.cpp overlay.cpp video.cpp \
+	nongl.cpp nnx.cpp $(am__append_1) $(am__append_2) \
+	$(am__append_3) Joystick.cpp Joystick_SDL.cpp $(am__append_4) \
+	$(am__append_5) $(am__append_6) $(am__append_7)
 all: all-am
 
 .SUFFIXES:
@@ -526,6 +528,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/logdebugger.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memdebugger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netplay-graffiti.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netplay.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nnx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nongl.Po@am__quote@

@@ -32,7 +32,7 @@ Bresenham Line algo from http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_a
 #define ENABLE_GRAFFITI // comment to disable GRAFFITI from compiling
 
 #include "netplay-text.h"
-#include "drivers/main.h"
+#include "video.h"
 
 class Graffiti : public TextCommand
 {
@@ -49,7 +49,7 @@ public:
 
   // the main operating points (MOP)
   // user input draws to an internal-surface
-  void Input_Event(const SDL_Event& event);
+  virtual void Input_Event(const void* event)=0;
   // which gets blitted to the pre-scaled main-surface
   void Blit(MDFN_Surface *target);
   // the server-designated user automatically runs this function to broadcast
@@ -85,12 +85,9 @@ public:
 
   void Send(Command command);
 
-private:
-  bool Process(const char *nick, const char *msg, uint32 len, bool &display);
+protected:
   void Paint(const int& x, const int& y);
   void Line(int& x0, int& y0,const int& x1,const int& y1);
-
-  void RecvSync(const char *msg, uint32 len);
 
   bool painting {false};
   bool active {false};
@@ -105,6 +102,11 @@ private:
     int x0 {0}, y0 {0};
     scale_t xscale {1}, yscale {1};
   } view;
+
+private:
+  virtual void ShowCursor(bool s=true)=0;
+  bool Process(const char *nick, const char *msg, uint32 len, bool &display);
+  void RecvSync(const char *msg, uint32 len);
 };
 
 #endif
