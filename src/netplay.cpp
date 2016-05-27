@@ -44,7 +44,7 @@
 int MDFNnetplay=0;
 
 static std::map<std::string, uint32> PlayersList;
-static char *OurNick = NULL;
+char *OurNick = NULL;
 
 static bool Joined = false;
 static uint32 LocalPlayersMask = 0;
@@ -60,16 +60,8 @@ static bool StateLoaded;	// Set to true/false in Netplay_Update() call paths, us
 static std::unique_ptr<uint8[]> incoming_buffer;	// TotalInputStateSize + 1
 static std::unique_ptr<uint8[]> outgoing_buffer;	// 1 + LocalInputStateSize + 4
 
-struct CommandEntry
-{
- const char *name;
- bool (*func)(const char* arg);
- const char *help_args;
- const char *help_desc;
-};
 // extensions
-#include "netplay-text.cpp"
-#include "netplay-graffiti.cpp"
+#include "netplay-graffiti.h"
 extern Graffiti *graffiti;
 
 static void RebuildPortVtoVMap(const uint32 PortDevIdx[])
@@ -1215,7 +1207,7 @@ static CommandEntry ConsoleCommands[]   =
  { "/ping", CC_ping,		"", "Pings the server." },
 
 #ifdef ENABLE_GRAFFITI
- GraffitiCommand,
+ Graffiti::ConsoleCommandEntry,
 #endif
  //{ "/integrity", CC_integrity,	"", "Starts netplay integrity check sequence." },
 

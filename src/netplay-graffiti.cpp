@@ -1,6 +1,6 @@
 #include "netplay-graffiti.h"
 
-static bool CC_graffiti(const char *arg)
+bool Graffiti::ConsoleCommandParser(const char *arg)
 {
   extern Graffiti *graffiti;
 
@@ -8,8 +8,8 @@ static bool CC_graffiti(const char *arg)
 }
 
 // TODO: Write proper help stanza
-const CommandEntry GraffitiCommand {
-  "/g", CC_graffiti,
+const CommandEntry Graffiti::ConsoleCommandEntry {
+  "/g", ConsoleCommandParser,
   gettext_noop(""),
   "Graffiti"
 };

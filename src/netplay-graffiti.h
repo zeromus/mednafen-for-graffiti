@@ -32,18 +32,22 @@ Bresenham Line algo from http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_a
 #define ENABLE_GRAFFITI // comment to disable GRAFFITI from compiling
 
 #include "netplay-text.h"
+#include "netplay-private.h"
 #include "video.h"
 
 class Graffiti : public TextCommand
 {
   using scale_t = double;
-  // Sub-commands of Graffiti
-  using cmd_t = uint8;  // aids in casting and DRY
+  using cmd_t = uint8;
   enum Command : cmd_t { paint, sync, clear };
   // I am using older style enum because it is easier to cast, given that I
-  // cast to/from this enum through template functions (<< >> TextCommand)
+  // cast to/from this enum through template functions...
+  // (TextCommand class's << and >> operators)
 
 public:
+  static const CommandEntry ConsoleCommandEntry;
+  static bool ConsoleCommandParser(const char *arg);
+
   Graffiti(MDFN_Surface *new_canvas);
   ~Graffiti();
 

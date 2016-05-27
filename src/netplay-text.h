@@ -1,8 +1,5 @@
 #pragma once
 
-#include <limits>
-#include <iostream>
-
 class TextCommand
 {
 public:
