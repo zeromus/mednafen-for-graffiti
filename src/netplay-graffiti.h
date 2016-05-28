@@ -111,7 +111,7 @@ protected:
     const coord_t& x, const coord_t& y, const wh_t& w, const wh_t& h,
     const uint32& bg_color, const bool broadcast);
   void Line(
-    coord_t& x0, coord_t& y0, const coord_t& x1, const coord_t& y1,
+    coord_t x0, coord_t y0, const coord_t& x1, const coord_t& y1,
     const wh_t& w, const wh_t& h, const uint32& bg_color, const bool broadcast);
 
   bool painting {false};

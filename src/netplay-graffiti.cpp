@@ -142,7 +142,7 @@ void Graffiti::Paint(
 }
 
 void Graffiti::Line(
-  coord_t& x0, coord_t& y0, const coord_t& x1, const coord_t& y1,
+  coord_t x0, coord_t y0, const coord_t& x1, const coord_t& y1,
   const wh_t& w, const wh_t& h, const uint32& bg_color, const bool broadcast)
 {
   coord_t xo0 = x0, yo0 = y0;
