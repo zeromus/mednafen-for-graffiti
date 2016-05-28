@@ -3,11 +3,6 @@
 Graffiti_SDL::Graffiti_SDL(MDFN_Surface *new_canvas) :Graffiti(new_canvas)
 {}
 
-void Graffiti_SDL::ShowCursor(bool s)
-{
-  SDL_MDFN_ShowCursor(s);
-}
-
 void Graffiti_SDL::Input_Event(const SDL_Event& event)
 {
   if(!enabled || !active)
@@ -99,4 +94,9 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
 
     default:break;
   }
+}
+
+void Graffiti_SDL::ShowCursor(bool s)
+{
+  SDL_MDFN_ShowCursor(s);
 }

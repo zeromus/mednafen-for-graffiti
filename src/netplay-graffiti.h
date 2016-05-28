@@ -133,7 +133,11 @@ protected:
 
 private:
   virtual void ShowCursor(bool s=true)=0;
-  bool Process(const char *nick, const char *msg, uint32 len, bool &display);
+  bool Process(const char *nick, const char *msg, const uint32 len, bool &display);
+  void RecvPaint(const char *nick, const char *msg, const uint32 len);
+  void RecvLine(const char *nick, const char *msg, const uint32 len);
+  void RecvSync(const char *nick, const char *msg, const uint32 len);
+  void RecvClear(const char *nick, const char *msg, const uint32 len);
 };
 
 #endif

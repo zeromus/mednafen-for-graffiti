@@ -191,7 +191,71 @@ void Graffiti::Send(Command command)
   TextCommand::Send();
 }
 
-bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool& display)
+void Graffiti::RecvPaint(const char *nick, const char *msg, const uint32 len)
+{
+  if (!strcasecmp(nick, OurNick))
+    return;
+
+  LoadPacket(&msg[0], len);
+  coord_t x,y;
+  wh_t w, h;
+  color_t bg_color;
+  *this >> x >> y >> w >> h >> bg_color;
+  //MDFN_printf("PAINT: x: %d, y: %d, w: %d, h: %d, bg_color: %d\n", x, y, w, h, bg_color);
+  Paint(x, y, w, h, bg_color, false);
+}
+
+void Graffiti::RecvLine(const char *nick, const char *msg, const uint32 len)
+{
+  if (!strcasecmp(nick, OurNick))
+    return;
+
+  LoadPacket(&msg[0], len);
+  coord_t x0, y0, x1, y1;
+  wh_t w, h;
+  color_t bg_color;
+  *this >> x0 >> y0 >> x1 >> y1 >> w >> h >> bg_color;
+  // MDFN_printf(
+  //   "LINE: x0: %d, y0: %d, x1: %d, y1: %d, w: %d, h: %d, bg_color: %d\n",
+  //   x0, y0, x1, y1, w, h, bg_color);
+
+  Line(x0, y0, x1, y1, w, h, bg_color, false);
+}
+
+void Graffiti::RecvSync(const char *nick, const char *msg, const uint32 len)
+{
+  if (!strcasecmp(nick, OurNick))
+    return;
+
+  MDFN_printf("SYNC RECEIVED\n");
+  uLongf dlen = MDFN_de32lsb(&msg[0]);
+  //MDFN_printf("dlen = %d\n", dlen);
+  if(len > view.surface->Size()) // Uncompressed length sanity check - 1 MiB max.
+  {
+    throw MDFN_Error(0, _("Uncompressed graffiti state data is too large: %llu"), (unsigned long long)len);
+  }
+  else if(dlen != view.surface->Size()) // Uncompressed length sanity check - 1 MiB max.
+  {
+    throw MDFN_Error(0,
+      _("Uncompressed graffiti state-data size mismatch: expected: %zu, actual: %llu\n"
+        "If mednafen now supports non-32-bpp surfaces, then that's probably why graffiti broke. "
+        "Graffiti really should communicate surface data in an \"agnostic\" manner."),
+      view.surface->Size(), (unsigned long long)dlen);
+  }
+
+  // can decompress directly to the surface ONLY from assuming that all
+  // clients are using the same surface characteristics (namely 32bpp)
+  uncompress((Bytef *)view.surface->pixels, &dlen, (Bytef *)&msg[4], len - 4);
+}
+
+void Graffiti::RecvClear(const char *nick, const char *msg, const uint32 len)
+{
+  if (!strcasecmp(nick, OurNick))
+    return;
+  view.Clear();
+}
+
+bool Graffiti::Process(const char *nick, const char *msg, const uint32 len, bool& display)
 {
   //MDFN_printf("Len: %d\n", len);
   LoadPacket(msg, sizeof(cmd_t));
@@ -200,65 +264,20 @@ bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool& disp
 
   msg += sizeof(cmd_t);
 
+  // TODO: perhaps a map<Command, function-call> instead of a switch?
   switch(cmd)
   {
   case Command::paint:
-    {
-      LoadPacket(&msg[0], len);
-      coord_t x,y;
-      wh_t w, h;
-      color_t bg_color;
-      *this >> x >> y >> w >> h >> bg_color;
-      //MDFN_printf("PAINT: x: %d, y: %d, w: %d, h: %d, bg_color: %d\n", x, y, w, h, bg_color);
-
-      if (strcasecmp(nick, OurNick))
-        Paint(x, y, w, h, bg_color, false);
-    }
+    RecvPaint(nick, msg, len);
     break;
   case Command::line:
-    {
-      LoadPacket(&msg[0], len);
-      coord_t x0, y0, x1, y1;
-      wh_t w, h;
-      color_t bg_color;
-      *this >> x0 >> y0 >> x1 >> y1 >> w >> h >> bg_color;
-      // MDFN_printf(
-      //   "LINE: x0: %d, y0: %d, x1: %d, y1: %d, w: %d, h: %d, bg_color: %d\n",
-      //   x0, y0, x1, y1, w, h, bg_color);
-
-      if (strcasecmp(nick, OurNick))
-        Line(x0, y0, x1, y1, w, h, bg_color, false);
-    }
+    RecvLine(nick, msg, len);
     break;
   case Command::sync:
-    if (!strcasecmp(nick, OurNick))
-      break;
-    MDFN_printf("SYNC RECEIVED\n");
-    {
-      uLongf dlen = MDFN_de32lsb(&msg[0]);
-      //MDFN_printf("dlen = %d\n", dlen);
-      if(len > view.surface->Size()) // Uncompressed length sanity check - 1 MiB max.
-      {
-        throw MDFN_Error(0, _("Uncompressed graffiti state data is too large: %llu"), (unsigned long long)len);
-      }
-      else if(dlen != view.surface->Size()) // Uncompressed length sanity check - 1 MiB max.
-      {
-        throw MDFN_Error(0,
-          _("Uncompressed graffiti state-data size mismatch: expected: %zu, actual: %llu\n"
-            "If mednafen now supports non-32-bpp surfaces, then that's probably why graffiti broke. "
-            "Graffiti really should communicate surface data in an \"agnostic\" manner."),
-          view.surface->Size(), (unsigned long long)dlen);
-      }
-
-      // can decompress directly to the surface ONLY from assuming that all
-      // clients are using the same surface characteristics (namely 32bpp)
-      uncompress((Bytef *)view.surface->pixels, &dlen, (Bytef *)&msg[4], len - 4);
-    }
+    RecvSync(nick, msg, len);
     break;
   case Command::clear:
-    if (!strcasecmp(nick, OurNick))
-      break;
-    view.Clear();
+    RecvClear(nick, msg, len);
     break;
   }
 
