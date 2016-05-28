@@ -191,6 +191,36 @@ void Graffiti::Send(Command command)
   TextCommand::Send();
 }
 
+bool Graffiti::Process(const char *nick, const char *msg, const uint32 len, bool& display)
+{
+  //MDFN_printf("Len: %d\n", len);
+  LoadPacket(msg, sizeof(cmd_t));
+  cmd_t cmd;
+  *this >> cmd;
+
+  msg += sizeof(cmd_t);
+
+  // TODO: perhaps a map<Command, function-call> instead of a switch?
+  switch(cmd)
+  {
+  case Command::paint:
+    RecvPaint(nick, msg, len);
+    break;
+  case Command::line:
+    RecvLine(nick, msg, len);
+    break;
+  case Command::sync:
+    RecvSync(nick, msg, len);
+    break;
+  case Command::clear:
+    RecvClear(nick, msg, len);
+    break;
+  }
+
+  display = false;
+  return true;
+}
+
 void Graffiti::RecvPaint(const char *nick, const char *msg, const uint32 len)
 {
   if (!strcasecmp(nick, OurNick))
@@ -253,36 +283,6 @@ void Graffiti::RecvClear(const char *nick, const char *msg, const uint32 len)
   if (!strcasecmp(nick, OurNick))
     return;
   view.Clear();
-}
-
-bool Graffiti::Process(const char *nick, const char *msg, const uint32 len, bool& display)
-{
-  //MDFN_printf("Len: %d\n", len);
-  LoadPacket(msg, sizeof(cmd_t));
-  cmd_t cmd;
-  *this >> cmd;
-
-  msg += sizeof(cmd_t);
-
-  // TODO: perhaps a map<Command, function-call> instead of a switch?
-  switch(cmd)
-  {
-  case Command::paint:
-    RecvPaint(nick, msg, len);
-    break;
-  case Command::line:
-    RecvLine(nick, msg, len);
-    break;
-  case Command::sync:
-    RecvSync(nick, msg, len);
-    break;
-  case Command::clear:
-    RecvClear(nick, msg, len);
-    break;
-  }
-
-  display = false;
-  return true;
 }
 /////////////////////////////
 Graffiti::View::View(MDFN_Surface *new_surface)
