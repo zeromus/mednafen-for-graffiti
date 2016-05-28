@@ -15,7 +15,7 @@ const CommandEntry Graffiti::ConsoleCommandEntry {
 };
 
 Graffiti::Graffiti(MDFN_Surface *new_surface) :
-  TextCommand(0xf171),
+  TextCommand(Magic_id, Payload_limit),
   view{new_surface}
 {
 }

@@ -1,6 +1,6 @@
 #include "netplay-text.h"
 
-TextCommand::TextCommand(magic_t m) :magic{m}
+TextCommand::TextCommand(magic_t m, limit_t l) :magic{m}, payload_limit{l}
 {
   TextCommand::Registrar.Register(this);
   *this << Registration::SuperMagic << magic;

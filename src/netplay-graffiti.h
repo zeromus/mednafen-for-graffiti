@@ -26,6 +26,13 @@ Unlisted emulators haven't been tested yet
 
 Bresenham Line algo from http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C
 */
+/* CRITICAL CHANGES
+ * Increased TextCommand size from 2,000 to 20,000
+  * I WILL be incorporating a new implementation so that each Textcommand has its own limit,
+  and so that regular TextCommand message limit is once again restored to original value.
+
+ * Added MDFN_Surface::Size function
+*/
 #ifndef __MDFN_NETPLAY_GRAFFITI_H
 #define __MDFN_NETPLAY_GRAFFITI_H
 
@@ -138,6 +145,9 @@ private:
   void RecvLine(const char *nick, const char *msg, const uint32 len);
   void RecvSync(const char *nick, const char *msg, const uint32 len);
   void RecvClear(const char *nick, const char *msg, const uint32 len);
+
+  static constexpr limit_t Payload_limit = 20000;
+  static constexpr magic_t Magic_id = 0xf171;
 };
 
 #endif

@@ -9,6 +9,7 @@ class TextCommand
 {
 public:
   using magic_t = uint16;
+  using limit_t = uint32;
   
   struct Registration {
   public:
@@ -26,7 +27,7 @@ public:
 
   static Registration Registrar;
 
-  TextCommand(magic_t m);
+  TextCommand(magic_t m, limit_t l);
 
   magic_t Magic() const;
 
@@ -66,4 +67,5 @@ protected:
   bool enabled {false};
   static std::string magic2str(magic_t m);
   const magic_t magic;
+  const limit_t payload_limit;
 };
