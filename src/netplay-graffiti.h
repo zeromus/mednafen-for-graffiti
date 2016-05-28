@@ -38,7 +38,6 @@ Bresenham Line algo from http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_a
 class Graffiti : public TextCommand
 {
   using scale_t = double;
-  using coord_t = uint16;
   using wh_t = uint16;  // width/height
   using color_t = uint32;
   using cmd_t = uint8;
@@ -102,6 +101,7 @@ public:
   void Send(Command command);
 
 protected:
+  using coord_t = uint16;
   // Call from driver mouse-capture routine
   std::pair<coord_t, coord_t> MouseCoords2SurfaceCoords(
     const coord_t& x, const coord_t& y);
