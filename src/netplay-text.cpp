@@ -1,6 +1,8 @@
 #include "netplay-text.h"
 
-TextCommand::TextCommand(magic_t m, limit_t l) :magic{m}, payload_limit{l}
+TextCommand::TextCommand(
+  const std::string title, const magic_t m, const limit_t l) :
+  title{title}, magic{m}, payload_limit{l}
 {
   TextCommand::Registrar.Register(this);
   *this << Registration::SuperMagic << magic;
@@ -35,7 +37,7 @@ void TextCommand::Send(const std::string& message)
 
 static inline bool magic_valid(const char *msg, TextCommand::magic_t magic)
 {
-  MDFN_printf("magic == %04x\n", magic);
+  //MDFN_printf("magic == %04x\n", magic);
   return *reinterpret_cast<const TextCommand::magic_t *>(msg) == magic;
 }
 
@@ -63,6 +65,13 @@ std::string TextCommand::magic2str(magic_t magic)
   return s;
 }
 
+bool TextCommand::EnableOnStart()
+{
+  return enable_on_start;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 int TextCommand::Registration::Register(TextCommand* tc)
 {
   commands.push_back(tc);
@@ -89,5 +98,18 @@ void TextCommand::Registration::Process(
       return;
   }
 }
+
+void TextCommand::Registration::EnableOnStart()
+{
+  for (auto& cmd : commands)
+  {
+    if (cmd->EnableOnStart())
+    {
+      MDFN_printf("EnableOnStart: %s\n", cmd->title.c_str());
+      cmd->Enable();
+    }
+  }
+}
+
 
 TextCommand::Registration TextCommand::Registrar {};

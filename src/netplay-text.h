@@ -20,6 +20,10 @@ public:
     ** They can modify whether command should be printed by setting display to false
     */
     void Process(const char *nick, const char *msg, uint32 len, bool &display);
+    void EnableOnStart();
+    // when netplay begins, this will be max(all-registered-commands' payload_limit)
+    uint8* network_buffer {nullptr};
+    size_t max_payload_limit {};
   private:
     std::vector<TextCommand *> commands;
     bool SuperMagicValid(const char* msg) const;
@@ -27,14 +31,14 @@ public:
 
   static Registration Registrar;
 
-  TextCommand(magic_t m, limit_t l);
+  TextCommand(const std::string title, const magic_t m, const limit_t l);
 
   magic_t Magic() const;
 
-  void Enable(bool e=true);
-  void Disable();
-  void ToggleEnable();
-  bool Enabled() const;
+  virtual void Enable(bool e=true);
+  virtual void Disable();
+  virtual void ToggleEnable();
+  virtual bool Enabled() const;
 
   template<class T>
   TextCommand& operator<< (T i)
@@ -61,11 +65,21 @@ public:
 
   void LoadPacket(const char* str, uint32 len);
 
+  bool EnableOnStart();
+
+  std::string title;
 protected:
   std::string omsg;
   std::string imsg;
   bool enabled {false};
+  bool enable_on_start {false};
   static std::string magic2str(magic_t m);
   const magic_t magic;
   const limit_t payload_limit;
 };
+
+/*
+@NetPlayStart -- Trigger a TextCommand function to create the max_payload_len buffer.
+
+@NetPlayStop -- delete the buffer
+*/

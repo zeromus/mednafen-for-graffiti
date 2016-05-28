@@ -15,9 +15,10 @@ const CommandEntry Graffiti::ConsoleCommandEntry {
 };
 
 Graffiti::Graffiti(MDFN_Surface *new_surface) :
-  TextCommand(Magic_id, Payload_limit),
+  TextCommand("Graffiti", Magic_id, Payload_limit),
   view{new_surface}
 {
+  enable_on_start = true;
 }
 
 ///////////////
@@ -191,7 +192,7 @@ void Graffiti::Send(Command command)
   TextCommand::Send();
 }
 
-bool Graffiti::Process(const char *nick, const char *msg, const uint32 len, bool& display)
+bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool& display)
 {
   //MDFN_printf("Len: %d\n", len);
   LoadPacket(msg, sizeof(cmd_t));
@@ -199,6 +200,7 @@ bool Graffiti::Process(const char *nick, const char *msg, const uint32 len, bool
   *this >> cmd;
 
   msg += sizeof(cmd_t);
+  len -= sizeof(cmd_t);
 
   // TODO: perhaps a map<Command, function-call> instead of a switch?
   switch(cmd)
@@ -284,6 +286,15 @@ void Graffiti::RecvClear(const char *nick, const char *msg, const uint32 len)
     return;
   view.Clear();
 }
+
+std::pair<Graffiti::coord_t, Graffiti::coord_t> Graffiti::CalculateCenterCoords(coord_t x, coord_t y, wh_t w, wh_t h)
+{
+  auto hw = (w / 2);
+  auto hh = (h / 2);
+  return std::pair<coord_t, coord_t>(
+    x < hw ? 0 : x - hw,
+    y < hh ? 0 : y - hh);
+}
 /////////////////////////////
 Graffiti::View::View(MDFN_Surface *new_surface)
 {
@@ -320,6 +331,7 @@ std::vector<uint8> Graffiti::View::Compress()
 
   // TODO / WARNING -- this relies on all client surfaces using the same BPP
   clen = surface->Size() + surface->Size() / 1000 + 12;
+  cbuf.reserve(4 + clen);
   cbuf.resize(4 + clen);
   MDFN_en32lsb(&cbuf[0], surface->Size());
   compress2((Bytef *)&cbuf[0] + 4, &clen, (Bytef *)surface->pixels, surface->Size(), 7);

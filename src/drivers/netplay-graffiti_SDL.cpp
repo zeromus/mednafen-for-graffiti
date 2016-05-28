@@ -59,8 +59,11 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
         view.blue = (rand() % 7 + 1) * 32;
         break;
       }
-      view.x0 = xy.first - (view.width / 2);
-      view.y0 = xy.second - (view.height / 2);
+
+      auto xyc = CalculateCenterCoords(xy.first, xy.second, view.width, view.height);
+      view.x0 = xyc.first;
+      view.y0 = xyc.second;
+
       view.bg_color = view.surface->MakeColor(view.red, view.green, view.blue);
       Paint(
         view.x0, view.y0,
@@ -81,11 +84,11 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
       // Continue painting
       //MDFN_printf ("painting MOTION\n");
       auto xy = MouseCoords2SurfaceCoords(event.button.x, event.button.y);
-      coord_t x1 = xy.first - (view.width / 2);
-      coord_t y1 = xy.second - (view.height / 2);
+      auto xyc = CalculateCenterCoords(xy.first, xy.second, view.width, view.height);
+      coord_t x1 = xyc.first;
+      coord_t y1 = xyc.second;
 
-      Line(
-        view.x0, view.y0, x1, y1, view.width, view.height, view.bg_color, true);
+      Line(view.x0, view.y0, x1, y1, view.width, view.height, view.bg_color, true);
 
       view.x0 = x1;
       view.y0 = y1;

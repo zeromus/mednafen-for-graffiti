@@ -307,7 +307,8 @@ int NetplayStart(const uint32 PortDeviceCache[16], const uint32 PortDataLenCache
   if(MDFNMOV_IsPlaying())		/* Recording's ok during netplay, playback is not. */
    MDFNMOV_Stop();
 
-  graffiti->Enable();
+  //graffiti->Enable();
+  TextCommand::Registrar.EnableOnStart();
  }
  catch(std::exception &e)
  {
@@ -725,6 +726,13 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
 			 {
 			  throw MDFN_Error(0, _("Text command length is too short: %u"), totallen);
 	  		 }
+
+       // first read in nick
+
+       // if TextCommand signature
+       /// match to a registered textcommand
+       /// compare payload_length to registered command payload_limit
+       // else compare totallen to MaxLength
 
 			 if(totallen > MaxLength) // Sanity check
 			 {

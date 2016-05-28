@@ -138,9 +138,12 @@ protected:
     scale_t xscale {0}, yscale {0};
   } view;
 
+  std::pair<coord_t, coord_t> CalculateCenterCoords(
+    coord_t x, coord_t y, wh_t w, wh_t h);
+
 private:
   virtual void ShowCursor(bool s=true)=0;
-  bool Process(const char *nick, const char *msg, const uint32 len, bool &display);
+  bool Process(const char *nick, const char *msg, uint32 len, bool &display);
   void RecvPaint(const char *nick, const char *msg, const uint32 len);
   void RecvLine(const char *nick, const char *msg, const uint32 len);
   void RecvSync(const char *nick, const char *msg, const uint32 len);
