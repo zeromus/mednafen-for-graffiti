@@ -14,26 +14,26 @@ public:
   public:
     int Register(TextCommand *tc);
 
-    static const magic_t SuperMagic {0x0101};
+    static constexpr magic_t SuperMagic {0x0101};
     /* Call registered Text handlers
     ** They can modify whether command should be printed by setting display to false
     */
     void Process(const char *nick, const char *msg, uint32 len, bool &display);
   private:
     std::vector<TextCommand *> commands;
-    bool SuperMagicValid(const char* msg);
+    bool SuperMagicValid(const char* msg) const;
   };
 
   static Registration Registrar;
 
   TextCommand(magic_t m);
 
-  magic_t Magic();
+  magic_t Magic() const;
 
   void Enable(bool e=true);
   void Disable();
   void ToggleEnable();
-  bool Enabled();
+  bool Enabled() const;
 
   template<class T>
   TextCommand& operator<< (T i)
@@ -56,7 +56,7 @@ public:
   void Send(const std::string& message = "");
   virtual bool Process(const char *nick, const char *msg, uint32 len, bool &display)=0;
   
-  bool MagicValid(const char* msg);
+  bool MagicValid(const char* msg) const;
 
   void LoadPacket(const char* str, uint32 len);
 
@@ -65,6 +65,5 @@ protected:
   std::string imsg;
   bool enabled {false};
   static std::string magic2str(magic_t m);
-  magic_t magic;
-private:
+  const magic_t magic;
 };

@@ -6,7 +6,7 @@ TextCommand::TextCommand(magic_t m) :magic{m}
   *this << Registration::SuperMagic << magic;
 }
 
-TextCommand::magic_t TextCommand::Magic() { return magic; }
+TextCommand::magic_t TextCommand::Magic() const { return magic; }
 
 void TextCommand::Enable(bool e)
 {
@@ -23,7 +23,7 @@ void TextCommand::ToggleEnable()
   Enable(!enabled);
 }
 
-bool TextCommand::Enabled() { return enabled; }
+bool TextCommand::Enabled() const { return enabled; }
 
 void TextCommand::Send(const std::string& message)
 {
@@ -39,12 +39,12 @@ static inline bool magic_valid(const char *msg, TextCommand::magic_t magic)
   return *reinterpret_cast<const TextCommand::magic_t *>(msg) == magic;
 }
 
-bool TextCommand::Registration::SuperMagicValid(const char *msg)
+bool TextCommand::Registration::SuperMagicValid(const char *msg) const
 {
   return magic_valid(msg, SuperMagic);
 }
 
-bool TextCommand::MagicValid(const char* msg)
+bool TextCommand::MagicValid(const char* msg) const
 {
   return magic_valid(msg, magic);
 }
