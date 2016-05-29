@@ -6,6 +6,7 @@ TextCommand::TextCommand(
   const std::string title, const magic_t m, const limit_t l) :
   title{title}, magic{m}, payload_limit{l}
 {
+  //MDFN_printf("magic => 0x%X\n", magic);
   TextCommand::Registrar.Register(this);
   *this << Registration::SuperMagic << magic;
 }
@@ -81,8 +82,11 @@ TextCommand::limit_t TextCommand::PayloadLimit()
 
 int TextCommand::Registration::Register(TextCommand* tc)
 {
-  commands.push_back(tc);
   // assert all magic are unique
+  //MDFN_printf("magic => 0x%X\n", tc->Magic());
+  if (FindByMagic(tc->Magic()))
+    throw MDFN_Error(0, _("TextCommand with duplicate magic: 0x%x"), tc->Magic());
+  commands.push_back(tc);
   return 0;
 }
 

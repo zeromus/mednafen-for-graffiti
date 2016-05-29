@@ -5,11 +5,21 @@ comm. channel that could be simultaneously re-purposed. This set of classes
 facilitates adding netplay client features without requiring server
 modification.
 
-The TextCommand class should be used as a component, or as a base class of your
-netplay feature. When you instantiate it, provide a unique "magic number" that
+The TextCommand class should be used as a base class of your
+netplay feature. When you instantiate it, provide a unique "magic ID" that
 no other TextCommand uses [TODO: there should be a check for duplicates anyways],
 and specify a payload limit (in bytes).
 
+When MDFNNPCMD_TEXT commands are sent, they are automatically (outside of this class)
+associated with the nickname of their sender. All clients receive MDFNNPCMD_TEXT
+commands, including the sender.
+
+In order to co-exist over the MDFNNPCMD_TEXT comm. channel, all TextCommands are
+automatically "prefixed" with a magic ID. This ID is chosen based on the impossibility
+or strong unlikelyhood of it being used in regular chat messages.
+
+TextCommands may of course "queue" their own Command Types. Graffiti is a good
+example.
 */
 #ifndef _MDFN_NETPLAY_TEXT_H
 #define _MDFN_NETPLAY_TEXT_H
@@ -32,9 +42,7 @@ public:
     int Register(TextCommand *tc);
 
     static constexpr magic_t SuperMagic {0x0101};
-    /* Call registered Text handlers
-    ** They can modify whether command should be printed by setting display to false
-    */
+
     void CreateBuffer();
     void DestroyBuffer();
 
@@ -42,6 +50,10 @@ public:
     void DisableCommands();
 
     TextCommand* FindByMagic(magic_t magic);
+
+    /* Call registered Text handlers
+    ** They can modify whether command should be printed by setting display to false
+    */
     bool Process(const char *nick, const char *msg, uint32 len, bool &display);
 
     // when netplay begins, this will be max(all-registered-commands' payload_limit)
