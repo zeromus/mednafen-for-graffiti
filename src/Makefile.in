@@ -182,7 +182,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__mednafen_SOURCES_DIST = debug.cpp error.cpp mempatcher.cpp \
 	settings.cpp endian.cpp mednafen.cpp git.cpp file.cpp \
-	general.cpp memory.cpp netplay.cpp netplay-text.cpp \
+	general.cpp memory.cpp netplay.cpp netplay-STC.cpp \
 	netplay-graffiti.cpp state.cpp state_rewind.cpp movie.cpp \
 	player.cpp PSFLoader.cpp SNSFLoader.cpp SPCReader.cpp \
 	tests.cpp qtrecord.cpp Stream.cpp MemoryStream.cpp \
@@ -214,7 +214,7 @@ am_mednafen_OBJECTS = debug.$(OBJEXT) error.$(OBJEXT) \
 	mempatcher.$(OBJEXT) settings.$(OBJEXT) endian.$(OBJEXT) \
 	mednafen.$(OBJEXT) git.$(OBJEXT) file.$(OBJEXT) \
 	general.$(OBJEXT) memory.$(OBJEXT) netplay.$(OBJEXT) \
-	netplay-text.$(OBJEXT) netplay-graffiti.$(OBJEXT) \
+	netplay-STC.$(OBJEXT) netplay-graffiti.$(OBJEXT) \
 	state.$(OBJEXT) state_rewind.$(OBJEXT) movie.$(OBJEXT) \
 	player.$(OBJEXT) PSFLoader.$(OBJEXT) SNSFLoader.$(OBJEXT) \
 	SPCReader.$(OBJEXT) tests.$(OBJEXT) qtrecord.$(OBJEXT) \
@@ -580,7 +580,7 @@ AUTOMAKE_OPTIONS = subdir-objects
 DEFAULT_INCLUDES = -I$(top_builddir)/include -I$(top_srcdir)/include -I$(top_srcdir)/intl
 mednafen_SOURCES = debug.cpp error.cpp mempatcher.cpp settings.cpp \
 	endian.cpp mednafen.cpp git.cpp file.cpp general.cpp \
-	memory.cpp netplay.cpp netplay-text.cpp netplay-graffiti.cpp \
+	memory.cpp netplay.cpp netplay-STC.cpp netplay-graffiti.cpp \
 	state.cpp state_rewind.cpp movie.cpp player.cpp PSFLoader.cpp \
 	SNSFLoader.cpp SPCReader.cpp tests.cpp qtrecord.cpp Stream.cpp \
 	MemoryStream.cpp FileStream.cpp IPSPatcher.cpp $(am__append_4) \
@@ -876,8 +876,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mempatcher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/movie.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netplay-STC.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netplay-graffiti.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netplay-text.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netplay.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/player.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/qtrecord.Po@am__quote@

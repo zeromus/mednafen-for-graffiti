@@ -27,9 +27,9 @@ Unlisted emulators haven't been tested yet
 Bresenham Line algo from http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C
 */
 /* CRITICAL CHANGES
- * Increased MDFNNP_SubTextCommand size from 2,000 to 20,000
+ * Increased MDFNNP_STC size from 2,000 to 20,000
   * I WILL be incorporating a new implementation so that each Textcommand has its own limit,
-  and so that regular MDFNNP_SubTextCommand message limit is once again restored to original value.
+  and so that regular MDFNNP_STC message limit is once again restored to original value.
 
  * Added MDFN_Surface::Size function
 */
@@ -38,11 +38,11 @@ Bresenham Line algo from http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_a
 
 #define ENABLE_GRAFFITI // comment to disable GRAFFITI from compiling
 
-#include "netplay-text.h"
+#include "netplay-STC.h"
 #include "netplay-private.h"
 #include "video.h"
 
-class Graffiti : public MDFNNP_SubTextCommand
+class Graffiti : public MDFNNP_STC
 {
   using scale_t = double;
   using wh_t = uint16;  // width/height
@@ -51,7 +51,7 @@ class Graffiti : public MDFNNP_SubTextCommand
   enum Command : cmd_t { paint, line, sync, clear };
   // I am using older style enum because it is easier to cast, given that I
   // cast to/from this enum through template functions...
-  // (MDFNNP_SubTextCommand class's << and >> operators)
+  // (MDFNNP_STC class's << and >> operators)
 
 public:
   static const CommandEntry ConsoleCommandEntry;

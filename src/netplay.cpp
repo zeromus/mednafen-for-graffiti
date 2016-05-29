@@ -156,8 +156,8 @@ void MDFNI_NetplayStop(void)
 	}
 	else puts("Check your code!");
 
-  MDFNNP_SubTextCommand::Registrar.DisableCommands();
-  MDFNNP_SubTextCommand::Registrar.DestroyBuffer();
+  MDFNNP_STC::Registrar.DisableCommands();
+  MDFNNP_STC::Registrar.DestroyBuffer();
 }
 
 struct login_data_t
@@ -308,8 +308,8 @@ int NetplayStart(const uint32 PortDeviceCache[16], const uint32 PortDataLenCache
   if(MDFNMOV_IsPlaying())		/* Recording's ok during netplay, playback is not. */
    MDFNMOV_Stop();
 
-  MDFNNP_SubTextCommand::Registrar.CreateBuffer();
-  MDFNNP_SubTextCommand::Registrar.EnableOnStart();
+  MDFNNP_STC::Registrar.CreateBuffer();
+  MDFNNP_STC::Registrar.EnableOnStart();
  }
  catch(std::exception &e)
  {
@@ -716,8 +716,8 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
        bool display = true;
        const char* nick = NULL;
        const char* msg = NULL;
-			 static const uint32 MaxLength = MDFNNP_SubTextCommand::Registrar.MaxPayloadLimit() - 1;
-       char* neobuf = &MDFNNP_SubTextCommand::Registrar.network_buffer[0];
+			 static const uint32 MaxLength = MDFNNP_STC::Registrar.MaxPayloadLimit() - 1;
+       char* neobuf = &MDFNNP_STC::Registrar.network_buffer[0];
 			 const uint32 totallen = raw_len;
                          uint32 nicklen;
                          bool NetEcho = false;
@@ -765,12 +765,12 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
 			  trio_asprintf(&textbuf, "* %s", msg);
 			 }
        
-       if (!MDFNNP_SubTextCommand::Registrar.Process(nick, msg, totallen - (4 + nicklen), display))
+       if (!MDFNNP_STC::Registrar.Process(nick, msg, totallen - (4 + nicklen), display))
        {
         MDFN_printf("Checking regular chat msg payload length!!\n");
-        if(totallen > MDFNNP_SubTextCommand::NormalPayloadLimit) // Sanity check
+        if(totallen > MDFNNP_STC::NormalPayloadLimit) // Sanity check
          throw MDFN_Error(0, _("Text command length is too long: limit: %u, actual: %u"),
-          MDFNNP_SubTextCommand::NormalPayloadLimit, totallen);
+          MDFNNP_STC::NormalPayloadLimit, totallen);
        }
        if (display)
         MDFND_NetplayText(textbuf, NetEcho);
