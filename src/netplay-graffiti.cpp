@@ -266,24 +266,7 @@ void Graffiti::RecvSync(const char *nick, const char *msg, const uint32 len)
     return;
 
   MDFN_printf("SYNC RECEIVED\n");
-  uLongf dlen = MDFN_de32lsb(&msg[0]);
-  //MDFN_printf("dlen = %d\n", dlen);
-  if(len > view.surface->Size()) // Uncompressed length sanity check - 1 MiB max.
-  {
-    throw MDFN_Error(0, _("Uncompressed graffiti state data is too large: %llu"), (unsigned long long)len);
-  }
-  else if(dlen != view.surface->Size()) // Uncompressed length sanity check - 1 MiB max.
-  {
-    throw MDFN_Error(0,
-      _("Uncompressed graffiti state-data size mismatch: expected: %zu, actual: %llu\n"
-        "If mednafen now supports non-32-bpp surfaces, then that's probably why graffiti broke. "
-        "Graffiti really should communicate surface data in an \"agnostic\" manner."),
-      view.surface->Size(), (unsigned long long)dlen);
-  }
-
-  // can decompress directly to the surface ONLY from assuming that all
-  // clients are using the same surface characteristics (namely 32bpp)
-  uncompress((Bytef *)view.surface->pixels, &dlen, (Bytef *)&msg[4], len - 4);
+  view.Uncompress(MDFN_de32lsb(&msg[0]), &msg[4], len - 4);
 }
 
 void Graffiti::RecvClear(const char *nick, const char *msg, const uint32 len)
@@ -347,6 +330,27 @@ std::vector<uint8> Graffiti::View::Compress()
   // ideally cbuf should be the istr to begin with (resized and at the proper index)
   cbuf.resize(clen + 4);
   return cbuf;
+}
+
+void Graffiti::View::Uncompress(uLongf dlen, const void *msg, uint32 len)
+{
+  //MDFN_printf("dlen = %d\n", dlen);
+  if(dlen > surface->Size()) // Uncompressed length sanity check - 1 MiB max.
+  {
+    throw MDFN_Error(0, _("Uncompressed graffiti state data is too large: %llu"), (unsigned long long)len);
+  }
+  else if(dlen != surface->Size()) // Uncompressed length sanity check - 1 MiB max.
+  {
+    throw MDFN_Error(0,
+      _("Uncompressed graffiti state-data size mismatch: expected: %zu, actual: %llu\n"
+        "If mednafen now supports non-32-bpp surfaces, then that's probably why graffiti broke. "
+        "Graffiti really should communicate surface data in an \"agnostic\" manner."),
+      surface->Size(), (unsigned long long)dlen);
+  }
+
+  // can decompress directly to the surface ONLY from assuming that all
+  // clients are using the same surface characteristics (namely 32bpp)
+  uncompress((Bytef *)surface->pixels, &dlen, (Bytef *)msg, len);
 }
 
 Graffiti::Color::Color(color_t rgba) : rgba{rgba}

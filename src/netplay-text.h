@@ -62,7 +62,6 @@ public:
   private:
     std::vector<TextCommand *> commands;
     bool SuperMagicValid(const char* msg) const;
-    //limit_t FindMaxPayloadLimit();
   };
 
   static Registration Registrar;
@@ -77,22 +76,9 @@ public:
   virtual bool Enabled() const;
 
   template<class T>
-  TextCommand& operator<< (T i)
-  {
-    char buf[sizeof(T)];
-    MDFN_enlsb<T, false>(buf, i);
-
-    omsg += std::string(reinterpret_cast<const char *>(buf), sizeof(i));
-    return *this;
-  }
-
+  TextCommand& operator<< (T i);
   template<class T>
-  TextCommand& operator>> (T &i)
-  {
-    i = MDFN_delsb<T, false>(&imsg[0]);
-    imsg.erase(0, sizeof(i));
-    return *this;
-  }
+  TextCommand& operator>> (T &i);
 
   void Send(const std::string& message = "");
   virtual bool Process(const char *nick, const char *msg, uint32 len, bool &display)=0;
@@ -115,5 +101,23 @@ protected:
   const magic_t magic;
   const limit_t payload_limit;
 };
+
+template<class T>
+TextCommand& TextCommand::operator<< (T i)
+{
+  char buf[sizeof(T)];
+  MDFN_enlsb<T, false>(buf, i);
+
+  omsg += std::string(reinterpret_cast<const char *>(buf), sizeof(i));
+  return *this;
+}
+
+template<class T>
+TextCommand& TextCommand::operator>> (T &i)
+{
+  i = MDFN_delsb<T, false>(&imsg[0]);
+  imsg.erase(0, sizeof(i));
+  return *this;
+}
 
 #endif

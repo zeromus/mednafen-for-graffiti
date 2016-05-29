@@ -148,6 +148,7 @@ protected:
     ~View();
     void Clear();
     std::vector<uint8> Compress();
+    void Uncompress(uLongf dlen, const void *msg, uint32 len);
     MDFN_Surface *surface {nullptr};
     // default of 0 to assist in noticing whether SetScale was called in time
     scale_t xscale {0}, yscale {0};
