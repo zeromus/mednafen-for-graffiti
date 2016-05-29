@@ -8,16 +8,16 @@ modification.
 
 The MDFNNP_STC class should be used as a base class of your
 netplay feature. When you instantiate it, provide a unique "magic ID" that
-no other MDFNNP_STC uses [TODO: there should be a check for duplicates anyways],
-and specify a payload limit (in bytes).
+no other MDFNNP_STC uses, and specify a payload limit (in bytes).
 
 When MDFNNPCMD_TEXT commands are sent, they are automatically (outside of this class)
 associated with the nickname of their sender. All clients receive MDFNNPCMD_TEXT
 commands, including the sender.
 
 In order to co-exist over the MDFNNPCMD_TEXT comm. channel, all MDFNNP_STCs are
-automatically "prefixed" with a magic ID. This ID is chosen based on the impossibility
-or strong unlikelyhood of it being used in regular chat messages.
+automatically "prefixed" with a "Super" magic ID. This ID is chosen based on the
+impossibility or strong unlikelyhood of it being used in regular chat messages.
+Furthermore, each different MDFNNPCMD_TEXT itself has its own magic ID.
 
 MDFNNP_STCs may of course "queue" their own Command Types. Graffiti is a good
 example.
