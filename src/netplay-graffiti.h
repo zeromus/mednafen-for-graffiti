@@ -123,8 +123,6 @@ protected:
     color_t rgba{};
   };
 
-  Color MakeColor(uint8 r, uint8 g, uint8 b, uint8 a =0);
-
   // All drawing routines expect surface coordinates (not raw mouse coords)
   void Paint(
     coord_t x, coord_t y, wh_t w, wh_t h,
@@ -136,11 +134,14 @@ protected:
   bool painting {false};
   bool active {false};
 
+  static constexpr wh_t Default_width = 5, Default_height = 5;
   struct LineTool {
-    wh_t w{5}, h{5};
+    LineTool() = default;
+    LineTool(wh_t w, wh_t h, Color c={0,0,0}) : w{w}, h{h}, color{c} {}
+    wh_t w{Default_width}, h{Default_height};
     coord_t x0 {0}, y0 {0};
     Color color;
-  } line_tool;
+  } line_tool, eraser_tool;
 
   struct View {
     View(MDFN_Surface *new_surface);

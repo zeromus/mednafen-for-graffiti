@@ -22,6 +22,8 @@ Graffiti::Graffiti(MDFN_Surface *new_surface) :
 {
   enable_on_start = true;
   Color::s = new_surface;
+  line_tool = {};
+  eraser_tool = {Default_width * 3, Default_height * 3};
 }
 
 ///////////////
@@ -360,9 +362,4 @@ Graffiti::Color::Color(color_t rgba) : rgba{rgba}
 Graffiti::Color::Color(uint8 r, uint8 g, uint8 b, uint8 a) : r{r}, g{g}, b{b}, a{a}
 {
   rgba = s->MakeColor(r, g, b, a);
-}
-
-Graffiti::Color Graffiti::MakeColor(uint8 r, uint8 g, uint8 b, uint8 a)
-{
-  return view.surface->MakeColor(r, g, b, a);
 }

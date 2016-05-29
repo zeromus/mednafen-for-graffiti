@@ -14,6 +14,7 @@ public:
   void Input_Event(const SDL_Event& event);
 private:
   void ShowCursor(bool s=true);
+  LineTool *ltool {nullptr};
 };
 
 #endif
