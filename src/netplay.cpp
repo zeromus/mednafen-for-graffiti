@@ -123,7 +123,7 @@ static void NetError(const char *format, ...)
  free(temp);
 }
 
-static void NetPrintText(const char *format, ...)
+void NetPrintText(const char *format, ...)
 {
  char *temp = NULL;
  va_list ap;

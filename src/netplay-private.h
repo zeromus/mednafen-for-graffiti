@@ -14,4 +14,6 @@ struct CommandEntry
 
 extern char *OurNick;
 
+void NetPrintText(const char *format, ...);
+
 #endif

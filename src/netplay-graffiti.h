@@ -138,6 +138,7 @@ protected:
   struct LineTool {
     LineTool() = default;
     LineTool(wh_t w, wh_t h, Color c={0,0,0}) : w{w}, h{h}, color{c} {}
+    void SetSize(wh_t w, wh_t h) { if(w) this->w = w; if(h) this->h = h; }
     wh_t w{Default_width}, h{Default_height};
     coord_t x0 {0}, y0 {0};
     Color color;

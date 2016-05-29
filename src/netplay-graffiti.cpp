@@ -29,25 +29,70 @@ Graffiti::Graffiti(MDFN_Surface *new_surface) :
 ///////////////
 bool Graffiti::ParseConsoleCommand(const char *arg)
 {
+  const char* sc = strtok(const_cast<char *>(arg), " ");
+  if (!sc) return true;
+
   if (!strcmp("", arg))
     ToggleActivate();
-  else if (!strcmp("enable", arg) || !strcmp("en", arg))
+  else if (!strcmp("enable", sc) || !strcmp("en", sc))
   {
     Enable();
     Activate();
   }
-  else if (!strcmp("disable", arg) || !strcmp("dis", arg))
+  else if (!strcmp("disable", sc) || !strcmp("dis", sc))
   {
     Deactivate();
     return false;
   }
-  else if (!strcmp("clear", arg))
+  else if (!strcmp("clear", sc))
   {
     ClearLocalSurface();
     ClearRemoteSurfaces();
     return false;
   }
+  else if (!strcmp("l", sc) || !strcmp("line", sc))
+  {
+    int a = Default_width;
+    while (const char* token = strtok(nullptr, " "))
+    {
+      enum class Type { w, h, wh, none } type;
+      if (!strcmp("w", token))
+      {
+        type = Type::w;
+      }
+      else if (!strcmp("h", token))
+      {
+        type = Type::h;
+      }
+      else if (!strcmp("wh", token))
+      {
+        type = Type::wh;
+      }
+      else
+      {
+        type = Type::none;
+      }
 
+      if (type == Type::none || !(token = strtok(nullptr, " ")))
+        continue;
+
+      if(sscanf(token, "%u", &a) == 1 && a)
+      {
+        switch(type)
+        {
+          case Type::w: line_tool.SetSize(a, 0); break;
+          case Type::h: line_tool.SetSize(0, a); break;
+          case Type::wh: line_tool.SetSize(a, a); break;
+        }
+      }
+      else
+      {
+        NetPrintText(_("*** %s command requires at least %u non-zero integer argument(s)."), "line", 1);
+        return(true);
+      }
+    }
+    return false;
+  }
   return true;  // keep console open
 }
 
