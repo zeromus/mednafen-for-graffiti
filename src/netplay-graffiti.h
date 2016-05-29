@@ -27,9 +27,9 @@ Unlisted emulators haven't been tested yet
 Bresenham Line algo from http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C
 */
 /* CRITICAL CHANGES
- * Increased TextCommand size from 2,000 to 20,000
+ * Increased MDFNNP_SubTextCommand size from 2,000 to 20,000
   * I WILL be incorporating a new implementation so that each Textcommand has its own limit,
-  and so that regular TextCommand message limit is once again restored to original value.
+  and so that regular MDFNNP_SubTextCommand message limit is once again restored to original value.
 
  * Added MDFN_Surface::Size function
 */
@@ -42,7 +42,7 @@ Bresenham Line algo from http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_a
 #include "netplay-private.h"
 #include "video.h"
 
-class Graffiti : public TextCommand
+class Graffiti : public MDFNNP_SubTextCommand
 {
   using scale_t = double;
   using wh_t = uint16;  // width/height
@@ -51,7 +51,7 @@ class Graffiti : public TextCommand
   enum Command : cmd_t { paint, line, sync, clear };
   // I am using older style enum because it is easier to cast, given that I
   // cast to/from this enum through template functions...
-  // (TextCommand class's << and >> operators)
+  // (MDFNNP_SubTextCommand class's << and >> operators)
 
 public:
   static const CommandEntry ConsoleCommandEntry;
@@ -83,7 +83,7 @@ public:
   automatically broadcasts their surface to all other players */
   bool Broadcast(); // returns true if actually broadcasted (ie when module enabled)
 
-  // Enable() refers to whether the module is allowed to receive TextCommands
+  // Enable() refers to whether the module is allowed to receive network events
   // and conditionally affects the main operating points (MOP).
   /* Normally, the MOP should not function if this module is disabled. However,
   I have deemed it best practice to keep the module enabled even when the user

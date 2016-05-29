@@ -17,7 +17,7 @@ const CommandEntry Graffiti::ConsoleCommandEntry {
 };
 
 Graffiti::Graffiti(MDFN_Surface *new_surface) :
-  TextCommand("Graffiti", Magic_id, Payload_limit),
+  MDFNNP_SubTextCommand("Graffiti", Magic_id, Payload_limit),
   view{new_surface}
 {
   enable_on_start = true;
@@ -57,14 +57,14 @@ void Graffiti::ClearRemoteSurfaces() { Send(Command::clear); }
 void Graffiti::Enable(bool e)
 {
   active = e;
-  TextCommand::Enable(e);
+  MDFNNP_SubTextCommand::Enable(e);
   ShowCursor(e);
 }
 
 void Graffiti::Disable()
 {
   active = false;
-  TextCommand::Disable();
+  MDFNNP_SubTextCommand::Disable();
   ShowCursor(0);
   ClearLocalSurface();
 }
@@ -195,7 +195,7 @@ void Graffiti::Send(Command command)
     }
     break;
   }
-  TextCommand::Send();
+  MDFNNP_SubTextCommand::Send();
 }
 
 bool Graffiti::Process(const char *nick, const char *msg, uint32 len, bool& display)
