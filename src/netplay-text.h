@@ -11,7 +11,7 @@ public:
   using magic_t = uint16;
   using limit_t = uint32;
 
-  static const limit_t NormalPayloadLimit = 2000; // chat messages
+  static const limit_t NormalPayloadLimit; // chat messages
   
   struct Registration {
   public:

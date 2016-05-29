@@ -1,5 +1,7 @@
 #include "netplay-text.h"
 
+const TextCommand::limit_t TextCommand::NormalPayloadLimit = 2000;
+
 TextCommand::TextCommand(
   const std::string title, const magic_t m, const limit_t l) :
   title{title}, magic{m}, payload_limit{l}
@@ -87,7 +89,7 @@ int TextCommand::Registration::Register(TextCommand* tc)
 TextCommand::limit_t TextCommand::Registration::MaxPayloadLimit()
 {
   auto c = network_buffer.capacity();
-  // TODO : throw exception if capacity is 0
+  // CONSIDER : throw exception if capacity is 0
   return c;
 }
 

@@ -717,7 +717,6 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
        const char* nick = NULL;
        const char* msg = NULL;
 			 static const uint32 MaxLength = TextCommand::Registrar.MaxPayloadLimit() - 1;
-			 //char neobuf[MaxLength + 1];
        char* neobuf = &TextCommand::Registrar.network_buffer[0];
 			 const uint32 totallen = raw_len;
                          uint32 nicklen;
@@ -767,8 +766,12 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
 			 }
        
        if (!TextCommand::Registrar.Process(nick, msg, totallen - (4 + nicklen), display))
+       {
+        MDFN_printf("Checking regular chat msg payload length!!\n");
         if(totallen > TextCommand::NormalPayloadLimit) // Sanity check
-         throw MDFN_Error(0, _("Text command length is too long: %u"), totallen);
+         throw MDFN_Error(0, _("Text command length is too long: limit: %u, actual: %u"),
+          TextCommand::NormalPayloadLimit, totallen);
+       }
        if (display)
         MDFND_NetplayText(textbuf, NetEcho);
 			 if (textbuf)
