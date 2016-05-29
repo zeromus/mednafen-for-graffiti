@@ -1,5 +1,7 @@
 #include "netplay-graffiti.h"
 
+MDFN_Surface * Graffiti::Color::s {nullptr};
+
 bool Graffiti::ConsoleCommandParser(const char *arg)
 {
   extern Graffiti *graffiti;
@@ -19,6 +21,7 @@ Graffiti::Graffiti(MDFN_Surface *new_surface) :
   view{new_surface}
 {
   enable_on_start = true;
+  Color::s = new_surface;
 }
 
 ///////////////
@@ -132,20 +135,20 @@ std::pair<Graffiti::coord_t, Graffiti::coord_t> Graffiti::MouseCoords2SurfaceCoo
 
 void Graffiti::Paint(
   coord_t x, coord_t y, wh_t w, wh_t h,
-  uint32 bg_color, const bool broadcast)
+  const Color& color, const bool broadcast)
 {
-  MDFN_DrawFillRect(view.surface, x, y, w, h, bg_color);
+  MDFN_DrawFillRect(view.surface, x, y, w, h, color.rgba);
 
   if (broadcast)
   {
-    *this << static_cast<cmd_t>(Command::paint) << x << y << w << h << bg_color;
+    *this << static_cast<cmd_t>(Command::paint) << x << y << w << h << color.rgba;
     Send(Command::paint);
   }
 }
 
 void Graffiti::Line(
   coord_t x0, coord_t y0, coord_t x1, coord_t y1,
-  wh_t w, wh_t h, uint32 bg_color, const bool broadcast)
+  wh_t w, wh_t h, const Color& color, const bool broadcast)
 {
   coord_t xo0 = x0, yo0 = y0;
   int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
@@ -153,7 +156,7 @@ void Graffiti::Line(
   int err = (dx>dy ? dx : -dy)/2, e2;
 
   for(;;){
-    Paint(x0, y0, w, h, bg_color, false);
+    Paint(x0, y0, w, h, color.rgba, false);
     if (x0==x1 && y0==y1) break;
     e2 = err;
     if (e2 >-dx) { err -= dy; x0 += sx; }
@@ -162,7 +165,7 @@ void Graffiti::Line(
 
   if (broadcast)
   {
-    *this << static_cast<cmd_t>(Command::line) << xo0 << yo0 << x1 << y1 << w << h << bg_color;
+    *this << static_cast<cmd_t>(Command::line) << xo0 << yo0 << x1 << y1 << w << h << color.rgba;
     Send(Command::line);
   }
 
@@ -232,10 +235,10 @@ void Graffiti::RecvPaint(const char *nick, const char *msg, const uint32 len)
   LoadPacket(&msg[0], len);
   coord_t x,y;
   wh_t w, h;
-  color_t bg_color;
-  *this >> x >> y >> w >> h >> bg_color;
-  //MDFN_printf("PAINT: x: %d, y: %d, w: %d, h: %d, bg_color: %d\n", x, y, w, h, bg_color);
-  Paint(x, y, w, h, bg_color, false);
+  color_t color;
+  *this >> x >> y >> w >> h >> color;
+  //MDFN_printf("PAINT: x: %d, y: %d, w: %d, h: %d, color: %d\n", x, y, w, h, color);
+  Paint(x, y, w, h, color, false);
 }
 
 void Graffiti::RecvLine(const char *nick, const char *msg, const uint32 len)
@@ -246,13 +249,13 @@ void Graffiti::RecvLine(const char *nick, const char *msg, const uint32 len)
   LoadPacket(&msg[0], len);
   coord_t x0, y0, x1, y1;
   wh_t w, h;
-  color_t bg_color;
-  *this >> x0 >> y0 >> x1 >> y1 >> w >> h >> bg_color;
+  color_t color;
+  *this >> x0 >> y0 >> x1 >> y1 >> w >> h >> color;
   // MDFN_printf(
-  //   "LINE: x0: %d, y0: %d, x1: %d, y1: %d, w: %d, h: %d, bg_color: %d\n",
-  //   x0, y0, x1, y1, w, h, bg_color);
+  //   "LINE: x0: %d, y0: %d, x1: %d, y1: %d, w: %d, h: %d, color: %d\n",
+  //   x0, y0, x1, y1, w, h, color);
 
-  Line(x0, y0, x1, y1, w, h, bg_color, false);
+  Line(x0, y0, x1, y1, w, h, color, false);
 }
 
 void Graffiti::RecvSync(const char *nick, const char *msg, const uint32 len)
@@ -342,4 +345,24 @@ std::vector<uint8> Graffiti::View::Compress()
   // ideally cbuf should be the istr to begin with (resized and at the proper index)
   cbuf.resize(clen + 4);
   return cbuf;
+}
+
+Graffiti::Color::Color(color_t rgba) : rgba{rgba}
+{
+  int rr,gg,bb,aa;
+  s->DecodeColor(rgba, rr, gg, bb, aa);
+
+  r = rr;
+  g = gg;
+  b = bb;
+  a = aa;
+}
+Graffiti::Color::Color(uint8 r, uint8 g, uint8 b, uint8 a) : r{r}, g{g}, b{b}, a{a}
+{
+  rgba = s->MakeColor(r, g, b, a);
+}
+
+Graffiti::Color Graffiti::MakeColor(uint8 r, uint8 g, uint8 b, uint8 a)
+{
+  return view.surface->MakeColor(r, g, b, a);
 }

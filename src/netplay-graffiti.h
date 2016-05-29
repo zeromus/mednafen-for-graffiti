@@ -113,16 +113,34 @@ protected:
   std::pair<coord_t, coord_t> MouseCoords2SurfaceCoords(
     coord_t x, coord_t y);
 
+  struct Color
+  {
+    static MDFN_Surface *s;
+    Color() = default;
+    Color(color_t rgba);
+    Color(uint8 r, uint8 g, uint8 b, uint8 a =0);
+    uint8 r{}, g{}, b{}, a{};
+    color_t rgba{};
+  };
+
+  Color MakeColor(uint8 r, uint8 g, uint8 b, uint8 a =0);
+
   // All drawing routines expect surface coordinates (not raw mouse coords)
   void Paint(
     coord_t x, coord_t y, wh_t w, wh_t h,
-    uint32 bg_color, const bool broadcast);
+    const Color& color, const bool broadcast);
   void Line(
     coord_t x0, coord_t y0, coord_t x1, coord_t y1,
-    wh_t w, wh_t h, uint32 bg_color, const bool broadcast);
+    wh_t w, wh_t h, const Color& color, const bool broadcast);
 
   bool painting {false};
   bool active {false};
+
+  struct LineTool {
+    wh_t w{5}, h{5};
+    coord_t x0 {0}, y0 {0};
+    Color color;
+  } line_tool;
 
   struct View {
     View(MDFN_Surface *new_surface);
@@ -130,10 +148,6 @@ protected:
     void Clear();
     std::vector<uint8> Compress();
     MDFN_Surface *surface {nullptr};
-    uint8 red, green, blue;
-    color_t bg_color;
-    wh_t width {5}, height {5};
-    coord_t x0 {0}, y0 {0};
     // default of 0 to assist in noticing whether SetScale was called in time
     scale_t xscale {0}, yscale {0};
   } view;
