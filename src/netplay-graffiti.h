@@ -70,7 +70,7 @@ public:
 
   This class assumes that SetScale has been called appropriately before
   any drawing routines are called */
-  void SetScale(const scale_t& x, const scale_t& y);
+  void SetScale(scale_t x, scale_t y);
 
   // the main operating points (MOP)
   // A) user input draws to an internal surface
@@ -111,15 +111,15 @@ protected:
   using coord_t = uint16;
   // Call from driver mouse-capture routine
   std::pair<coord_t, coord_t> MouseCoords2SurfaceCoords(
-    const coord_t& x, const coord_t& y);
+    coord_t x, coord_t y);
 
   // All drawing routines expect surface coordinates (not raw mouse coords)
   void Paint(
-    const coord_t& x, const coord_t& y, const wh_t& w, const wh_t& h,
-    const uint32& bg_color, const bool broadcast);
+    coord_t x, coord_t y, wh_t w, wh_t h,
+    uint32 bg_color, const bool broadcast);
   void Line(
-    coord_t x0, coord_t y0, const coord_t& x1, const coord_t& y1,
-    const wh_t& w, const wh_t& h, const uint32& bg_color, const bool broadcast);
+    coord_t x0, coord_t y0, coord_t x1, coord_t y1,
+    wh_t w, wh_t h, uint32 bg_color, const bool broadcast);
 
   bool painting {false};
   bool active {false};

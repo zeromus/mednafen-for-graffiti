@@ -81,7 +81,7 @@ void Graffiti::ToggleActivate()
   Activate(!active);
 }
 ////////////////
-void Graffiti::SetScale(const scale_t& x, const scale_t& y)
+void Graffiti::SetScale(scale_t x, scale_t y)
 {
   view.xscale = x;
   view.yscale = y;
@@ -114,11 +114,12 @@ void Graffiti::Blit(MDFN_Surface *target)
 }
 
 extern MDFNGI *CurGame;
-std::pair<Graffiti::coord_t, Graffiti::coord_t> Graffiti::MouseCoords2SurfaceCoords(const coord_t& x, const coord_t& y)
+std::pair<Graffiti::coord_t, Graffiti::coord_t> Graffiti::MouseCoords2SurfaceCoords(
+  coord_t x, coord_t y)
 {
-  MDFN_printf("x: %d, y: %d\n", x, y);
-  MDFN_printf("sx: %f, ox: %f\n", CurGame->mouse_scale_x, CurGame->mouse_offs_x);
-  MDFN_printf("sy: %f, oy: %f\n", CurGame->mouse_scale_y, CurGame->mouse_offs_y);
+  // MDFN_printf("x: %d, y: %d\n", x, y);
+  // MDFN_printf("sx: %f, ox: %f\n", CurGame->mouse_scale_x, CurGame->mouse_offs_x);
+  // MDFN_printf("sy: %f, oy: %f\n", CurGame->mouse_scale_y, CurGame->mouse_offs_y);
   // WARNING mouse_scale_x and mouse_offs_x UNTESTED
   scale_t mouse_scale_x = CurGame->mouse_scale_x ? CurGame->mouse_scale_x : 1.0;
   scale_t mouse_scale_y = CurGame->mouse_scale_y ? CurGame->mouse_scale_y : 1.0;
@@ -130,8 +131,8 @@ std::pair<Graffiti::coord_t, Graffiti::coord_t> Graffiti::MouseCoords2SurfaceCoo
 }
 
 void Graffiti::Paint(
-  const coord_t& x, const coord_t& y, const wh_t& w, const wh_t& h,
-  const uint32& bg_color, const bool broadcast)
+  coord_t x, coord_t y, wh_t w, wh_t h,
+  uint32 bg_color, const bool broadcast)
 {
   MDFN_DrawFillRect(view.surface, x, y, w, h, bg_color);
 
@@ -143,8 +144,8 @@ void Graffiti::Paint(
 }
 
 void Graffiti::Line(
-  coord_t x0, coord_t y0, const coord_t& x1, const coord_t& y1,
-  const wh_t& w, const wh_t& h, const uint32& bg_color, const bool broadcast)
+  coord_t x0, coord_t y0, coord_t x1, coord_t y1,
+  wh_t w, wh_t h, uint32 bg_color, const bool broadcast)
 {
   coord_t xo0 = x0, yo0 = y0;
   int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;

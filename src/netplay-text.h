@@ -1,4 +1,18 @@
-#pragma once
+/* netplay-text.h : an abstraction over the MDFNNPCMD_TEXT comm. channel
+
+Mednafen Netplay's MDFNNPCMD_TEXT was seen by me as a convenient pre-existing
+comm. channel that could be simultaneously re-purposed. This set of classes
+facilitates adding netplay client features without requiring server
+modification.
+
+The TextCommand class should be used as a component, or as a base class of your
+netplay feature. When you instantiate it, provide a unique "magic number" that
+no other TextCommand uses [TODO: there should be a check for duplicates anyways],
+and specify a payload limit (in bytes).
+
+*/
+#ifndef _MDFN_NETPLAY_TEXT_H
+#define _MDFN_NETPLAY_TEXT_H
 
 #include "mednafen.h"
 #include "netplay.h"
@@ -90,8 +104,4 @@ protected:
   const limit_t payload_limit;
 };
 
-/*
-@NetPlayStart -- Trigger a TextCommand function to create the max_payload_len buffer.
-
-@NetPlayStop -- delete the buffer
-*/
+#endif
