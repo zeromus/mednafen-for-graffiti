@@ -42,7 +42,7 @@
 #include "driver.h"
 
 // netplay extensions
-#include "netplay-graffiti.h"
+#include "graffiti.h"
 extern Graffiti *graffiti;
 
 int MDFNnetplay=0;

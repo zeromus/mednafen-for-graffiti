@@ -1,4 +1,4 @@
-#include "netplay-graffiti.h"
+#include "graffiti.h"
 
 MDFN_Surface * Graffiti::Color::s {nullptr};
 

@@ -2,7 +2,7 @@
 #define __MDFN_NETPLAY_GRAFFITI_SDL_H
 
 #include "main.h" // this is not a "lazy include"
-#include "../netplay-graffiti.h"
+#include "../graffiti.h"
 
 class Graffiti_SDL : public Graffiti
 {

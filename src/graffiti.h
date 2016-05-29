@@ -1,4 +1,4 @@
-// netplay-graffiti.h: It's FREAKIN GRAFFITI OVER NETPLAY
+// graffiti.h: It's FREAKIN GRAFFITI OVER NETPLAY
 /*
 Graffiti allows you to draw on the surface of your game. It's intended to be a fun
 addition to the netplay experience.

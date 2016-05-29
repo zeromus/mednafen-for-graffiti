@@ -60,7 +60,7 @@
 #include <mednafen/qtrecord.h>
 #include <math.h>
 
-#include "netplay-graffiti-SDL.h"
+#include "graffiti_SDL.h"
 Graffiti *graffiti {nullptr};
 Graffiti_SDL *graffiti_sdl {nullptr};
 
