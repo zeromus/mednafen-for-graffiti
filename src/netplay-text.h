@@ -10,6 +10,8 @@ class TextCommand
 public:
   using magic_t = uint16;
   using limit_t = uint32;
+
+  static const limit_t NormalPayloadLimit = 2000; // chat messages
   
   struct Registration {
   public:
@@ -19,14 +21,22 @@ public:
     /* Call registered Text handlers
     ** They can modify whether command should be printed by setting display to false
     */
-    void Process(const char *nick, const char *msg, uint32 len, bool &display);
+    void CreateBuffer();
+    void DestroyBuffer();
+
     void EnableOnStart();
+    void DisableCommands();
+
+    TextCommand* FindByMagic(magic_t magic);
+    bool Process(const char *nick, const char *msg, uint32 len, bool &display);
+
     // when netplay begins, this will be max(all-registered-commands' payload_limit)
-    uint8* network_buffer {nullptr};
-    size_t max_payload_limit {};
+    std::vector<char> network_buffer;
+    limit_t MaxPayloadLimit();
   private:
     std::vector<TextCommand *> commands;
     bool SuperMagicValid(const char* msg) const;
+    //limit_t FindMaxPayloadLimit();
   };
 
   static Registration Registrar;
@@ -66,6 +76,8 @@ public:
   void LoadPacket(const char* str, uint32 len);
 
   bool EnableOnStart();
+
+  limit_t PayloadLimit();
 
   std::string title;
 protected:

@@ -70,6 +70,11 @@ bool TextCommand::EnableOnStart()
   return enable_on_start;
 }
 
+TextCommand::limit_t TextCommand::PayloadLimit()
+{
+  return payload_limit;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 int TextCommand::Registration::Register(TextCommand* tc)
@@ -79,29 +84,69 @@ int TextCommand::Registration::Register(TextCommand* tc)
   return 0;
 }
 
-void TextCommand::Registration::Process(
+TextCommand::limit_t TextCommand::Registration::MaxPayloadLimit()
+{
+  auto c = network_buffer.capacity();
+  // TODO : throw exception if capacity is 0
+  return c;
+}
+
+void TextCommand::Registration::CreateBuffer()
+{
+  for (const auto& cmd : commands)
+    network_buffer.reserve(cmd->PayloadLimit());
+
+  network_buffer.reserve(TextCommand::NormalPayloadLimit);
+}
+
+void TextCommand::Registration::DestroyBuffer()
+{
+  network_buffer.clear();
+  network_buffer.shrink_to_fit();
+}
+
+TextCommand* TextCommand::Registration::FindByMagic(magic_t magic)
+{
+  for (const auto& cmd : commands)
+  {
+    if (cmd->Magic() == magic)
+      return cmd;
+  }
+
+  return nullptr;
+}
+
+bool TextCommand::Registration::Process(
   const char *nick, const char *msg, uint32 len, bool &display)
 {
   // for (int i=0; i < len; i++)
   //   MDFN_printf("0x%02x ", static_cast<unsigned char>(msg[i]));
 
   if (!SuperMagicValid(msg))
-    return;
+    return false;
+  // TODO: a MAP<cmd_t, TextCommand*> would be better!?
   // iterate through plugins until a match has been found (returns true)
+  auto sublen = len - (2 * sizeof(magic_t));
   for (auto& cmd : commands)
   {
     if (!cmd->MagicValid(&msg[sizeof(magic_t)]))
       continue;
     if (!cmd->Enabled())
       continue;
+    if(sublen > cmd->PayloadLimit()) // Sanity check
+      throw MDFN_Error(
+        0, _("TextCommand length is too long for \"%s\": limit: %u, actual: %u"),
+        cmd->title.c_str(), cmd->PayloadLimit(), sublen);
     if (cmd->Process(nick, &msg[sizeof(magic_t)*2], len, display))
-      return;
+      return true;
   }
+
+  return false;
 }
 
 void TextCommand::Registration::EnableOnStart()
 {
-  for (auto& cmd : commands)
+  for (const auto& cmd : commands)
   {
     if (cmd->EnableOnStart())
     {
@@ -110,6 +155,23 @@ void TextCommand::Registration::EnableOnStart()
     }
   }
 }
+
+void TextCommand::Registration::DisableCommands()
+{
+  for (const auto& cmd : commands)
+  {
+    MDFN_printf("Disable: %s\n", cmd->title.c_str());
+    cmd->Disable();
+  }
+}
+
+// TextCommand::limit_t TextCommand::Registration::FindMaxPayloadLimit()
+// {
+//   limit_t max = 0;
+//   for (const auto& cmd : commands)
+//     if (cmd->payload_limit > max)
+//       max = cmd->payload_limit;
+// }
 
 
 TextCommand::Registration TextCommand::Registrar {};

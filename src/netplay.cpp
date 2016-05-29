@@ -156,7 +156,8 @@ void MDFNI_NetplayStop(void)
 	}
 	else puts("Check your code!");
 
-  graffiti->Disable();
+  TextCommand::Registrar.DisableCommands();
+  TextCommand::Registrar.DestroyBuffer();
 }
 
 struct login_data_t
@@ -307,7 +308,7 @@ int NetplayStart(const uint32 PortDeviceCache[16], const uint32 PortDataLenCache
   if(MDFNMOV_IsPlaying())		/* Recording's ok during netplay, playback is not. */
    MDFNMOV_Stop();
 
-  //graffiti->Enable();
+  TextCommand::Registrar.CreateBuffer();
   TextCommand::Registrar.EnableOnStart();
  }
  catch(std::exception &e)
@@ -715,8 +716,9 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
        bool display = true;
        const char* nick = NULL;
        const char* msg = NULL;
-			 static const uint32 MaxLength = 20000;
-			 char neobuf[MaxLength + 1];
+			 static const uint32 MaxLength = TextCommand::Registrar.MaxPayloadLimit() - 1;
+			 //char neobuf[MaxLength + 1];
+       char* neobuf = &TextCommand::Registrar.network_buffer[0];
 			 const uint32 totallen = raw_len;
                          uint32 nicklen;
                          bool NetEcho = false;
@@ -726,13 +728,6 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
 			 {
 			  throw MDFN_Error(0, _("Text command length is too short: %u"), totallen);
 	  		 }
-
-       // first read in nick
-
-       // if TextCommand signature
-       /// match to a registered textcommand
-       /// compare payload_length to registered command payload_limit
-       // else compare totallen to MaxLength
 
 			 if(totallen > MaxLength) // Sanity check
 			 {
@@ -771,7 +766,9 @@ static void ProcessCommand(const uint8 cmd, const uint32 raw_len, const uint32 P
 			  trio_asprintf(&textbuf, "* %s", msg);
 			 }
        
-       TextCommand::Registrar.Process(nick, msg, totallen - (4 + nicklen), display);
+       if (!TextCommand::Registrar.Process(nick, msg, totallen - (4 + nicklen), display))
+        if(totallen > TextCommand::NormalPayloadLimit) // Sanity check
+         throw MDFN_Error(0, _("Text command length is too long: %u"), totallen);
        if (display)
         MDFND_NetplayText(textbuf, NetEcho);
 			 if (textbuf)
