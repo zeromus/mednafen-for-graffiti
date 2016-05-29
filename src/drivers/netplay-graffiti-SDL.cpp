@@ -1,4 +1,4 @@
-#include "netplay-graffiti_SDL.h"
+#include "netplay-graffiti-SDL.h"
 
 Graffiti_SDL::Graffiti_SDL(MDFN_Surface *new_canvas) :Graffiti(new_canvas)
 {}
