@@ -72,7 +72,7 @@ public:
 
   This class assumes that SetScale has been called appropriately before
   any drawing routines are called */
-  void SetScale(scale_t x, scale_t y);
+  virtual void SetScale(scale_t x, scale_t y);
 
   // the main operating points (MOP)
   // A) user input draws to an internal surface
@@ -124,6 +124,7 @@ protected:
   };
 
   static constexpr wh_t Default_width = 5, Default_height = 5;
+  static constexpr wh_t Eraser_scale = 3;
   struct LineTool {
     LineTool() = default;
     LineTool(wh_t w, wh_t h, Color c={0,0,0}) : w{w}, h{h}, color{c} {}
@@ -132,7 +133,10 @@ protected:
     wh_t w{Default_width}, h{Default_height};
     coord_t x0 {0}, y0 {0};
     Color color;
-  } line_tool, eraser_tool;
+  };
+  enum class LineToolType {line, eraser, amount};
+  LineTool line_tool[static_cast<int>(LineToolType::amount)];
+  virtual void SetLineToolSize(wh_t w, wh_t h);
 
   // All drawing routines expect surface coordinates (not raw mouse coords)
   void Paint(const LineTool& lt);

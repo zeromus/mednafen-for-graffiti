@@ -22,8 +22,11 @@ Graffiti::Graffiti(MDFN_Surface *new_surface) :
 {
   enable_on_start = true;
   Color::s = new_surface;
-  line_tool = {};
-  eraser_tool = {Default_width * 3, Default_height * 3};
+  //MDFN_printf("HELHLEHLE");
+  line_tool[static_cast<int>(LineToolType::line)] = {};
+  line_tool[static_cast<int>(LineToolType::eraser)] = {
+    Default_width * Eraser_scale,
+    Default_height * Eraser_scale};
 }
 
 ///////////////
@@ -80,9 +83,15 @@ bool Graffiti::ParseConsoleCommand(const char *arg)
       {
         switch(type)
         {
-          case Type::w: line_tool.SetSize(a, 0); break;
-          case Type::h: line_tool.SetSize(0, a); break;
-          case Type::wh: line_tool.SetSize(a, a); break;
+        case Type::w:
+          SetLineToolSize(a, 0);
+          break;
+        case Type::h:
+          SetLineToolSize(0, a);
+          break;
+        case Type::wh:
+          SetLineToolSize(a, a);
+          break;
         }
       }
       else
@@ -94,6 +103,12 @@ bool Graffiti::ParseConsoleCommand(const char *arg)
     return false;
   }
   return true;  // keep console open
+}
+
+void Graffiti::SetLineToolSize(wh_t w, wh_t h)
+{
+  line_tool[static_cast<int>(LineToolType::line)].SetSize(w, h);
+  line_tool[static_cast<int>(LineToolType::eraser)].SetSize(w * Eraser_scale, h  * Eraser_scale);
 }
 
 void Graffiti::ClearLocalSurface() { view.Clear(); }
@@ -205,7 +220,7 @@ void Graffiti::Paint(
 void Graffiti::Line(
   coord_t x0, coord_t y0, coord_t x1, coord_t y1,
   wh_t w, wh_t h, const Color& color, const bool broadcast)
-{
+{ // Note: I would have used MDFN_DrawLine but it doesn't support width/height
   coord_t xo0 = x0, yo0 = y0;
   int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
   int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1;
