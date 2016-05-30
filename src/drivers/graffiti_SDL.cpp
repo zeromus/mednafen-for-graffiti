@@ -68,14 +68,14 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
     if (event.button.button == SDL_BUTTON_WHEELUP)
     {
       LineTool& lt = line_tool[static_cast<int>(LineToolType::line)];
-      int w = lt.w + 2, h = lt.h + 2;
+      int w = lt.w + 1, h = lt.h + 1;
       if (w > 0 && h > 0)
         SetLineToolSize(w, h);
     }
     else if (event.button.button == SDL_BUTTON_WHEELDOWN)
     {
       LineTool& lt = line_tool[static_cast<int>(LineToolType::line)];
-      int w = lt.w - 2, h = lt.h - 2;
+      int w = lt.w - 1, h = lt.h - 1;
       if (w > 0 && h > 0)
         SetLineToolSize(w, h);
     }
@@ -155,10 +155,10 @@ static inline Graffiti::coord_t fix(Graffiti::coord_t w)
   auto dx = w % W;
   if (w/W == 0)
     w = W;
-  else if (dx >= (W/2))
+  else if (dx)
     w += W - dx;
-  else
-    w -= dx;
+  //else
+    //w -= dx;
 
   return w;
 }
@@ -187,20 +187,23 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
 
   MDFN_printf("lt.w: %d, lt.h: %d\n", lt.w, lt.h);
 
-  coord_t w = lt.w * view.xscale;
-  coord_t h = lt.h * view.yscale;
+  coord_t w = (lt.w+2) * view.xscale;
+  coord_t h = (lt.h+2) * view.yscale;
 
-  MDFN_printf("w: %d, h: %d\n", w, h);
+  auto dx = w % 8;
+  MDFN_printf("w: %d, h: %d, dx: %d\n", w, h, dx);
 
-  w = fix(w);
-  h = fix(h); // technically, h need not be a multiple of 8, but 8x1 cursor for
+  auto mouse_w = fix(w);
+  //h = fix(h); // technically, h need not be a multiple of 8, but 8x1 cursor for
               // a 1x1 pixel is ugly, so I fix the height too
 
-  MDFN_printf("w2: %d, h2: %d\n", w, h);
+  MDFN_printf("w2: %d, h2: %d\n", mouse_w, h);
 
-  auto w8 = w/8;
+  auto w8 = mouse_w/8;
 
   MDFN_printf("w8: %d\n", w8);
+
+  constexpr uint8 Lut[] = {0x0, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe};
 
   if (ltt == LineToolType::line)
   {
@@ -212,12 +215,19 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
       data[x] = 0x0;
       data[(h-1)*w8 + x] = 0;
     }
-    for (int y=1; y < (h-1); y++)
+    for (int y=0; y < h; y++)
     {
-      data[y*w8 + 0] = 0x7f;
+      data[y*w8 + 0] &= 0x7f;
       data[y*w8 + (w8-1)] &= 0xfe;
+
+      if (dx)
+      {
+        data[y*w8 + w8-1] &= Lut[dx-1];
+        mask[y*w8 + w8-1] &= Lut[dx];
+      }
     }
-    CursorSpec_SDL sc = { &tool_cursor[ti], &data[0], &mask[0], w, h, w/2, h/2, set };
+
+    CursorSpec_SDL sc = { &tool_cursor[ti], &data[0], &mask[0], mouse_w, h, w/2, h/2, set };
     SDL_MDFN_CreateCursor(&sc);
   }
   else if (ltt == LineToolType::eraser)
@@ -231,14 +241,20 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
       mask[(h-1)*w8 + x] = 0xff;
 
       uint8 v;
-      if (!x) v = 0x7f; else if (x == w8-1) v = 0xfe; else v = 0xff;
-      mask[(1)*w8 + x] = v;
-      mask[(h-1-1)*w8 + x] = v;
-      data[(1)*w8 + x] = v;
-      data[(h-1-1)*w8 + x] = v;
-      if (!x) v = 0x3f; else if (x == w8-1) v = 0xfc; else v = 0xff;
-      mask[(2)*w8 + x] = v;
-      mask[(h-1-2)*w8 + x] = v;
+      if (h >= 2)
+      {
+        if (!x) v = 0x7f; else if (x == w8-1) v = 0xfe; else v = 0xff;
+        mask[(1)*w8 + x] = v;
+        data[(1)*w8 + x] = v;
+        mask[(h-1-1)*w8 + x] = v;
+        data[(h-1-1)*w8 + x] = v;
+      }
+      if (h >= 3)
+      {
+        if (!x) v = 0x3f; else if (x == w8-1) v = 0xfc; else v = 0xff;
+        mask[(2)*w8 + x] = v;
+        mask[(h-1-2)*w8 + x] = v;
+      }
     }
     for (int y=1; y < (h-1); y++)
     {
@@ -247,7 +263,7 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
       data[y*w8 + 0] |= 0x40;
       data[y*w8 + (w8-1)] |= 0x02;
     }
-    CursorSpec_SDL sc = { &tool_cursor[ti], &data[0], &mask[0], w, h, w/2, h/2, set };
+    CursorSpec_SDL sc = { &tool_cursor[ti], &data[0], &mask[0], mouse_w, h, w/2, h/2, set };
     SDL_MDFN_CreateCursor(&sc);
   }
 }
