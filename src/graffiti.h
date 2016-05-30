@@ -123,7 +123,7 @@ protected:
     color_t rgba{};
   };
 
-  static constexpr wh_t Default_width = 4, Default_height = 4;
+  static constexpr wh_t Default_width = 5, Default_height = 5;
   static constexpr scale_t Eraser_scale = 2.5;
   struct LineTool {
     LineTool() = default;
