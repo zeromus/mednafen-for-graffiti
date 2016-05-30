@@ -110,8 +110,7 @@ public:
 protected:
   using coord_t = uint16;
   // Call from driver mouse-capture routine
-  std::pair<coord_t, coord_t> MouseCoords2SurfaceCoords(
-    coord_t x, coord_t y);
+  std::pair<coord_t, coord_t> MouseCoords2SurfaceCoords(coord_t x, coord_t y);
 
   struct Color
   {
@@ -123,17 +122,6 @@ protected:
     color_t rgba{};
   };
 
-  // All drawing routines expect surface coordinates (not raw mouse coords)
-  void Paint(
-    coord_t x, coord_t y, wh_t w, wh_t h,
-    const Color& color, const bool broadcast);
-  void Line(
-    coord_t x0, coord_t y0, coord_t x1, coord_t y1,
-    wh_t w, wh_t h, const Color& color, const bool broadcast);
-
-  bool painting {false};
-  bool active {false};
-
   static constexpr wh_t Default_width = 5, Default_height = 5;
   struct LineTool {
     LineTool() = default;
@@ -143,6 +131,13 @@ protected:
     coord_t x0 {0}, y0 {0};
     Color color;
   } line_tool, eraser_tool;
+
+  // All drawing routines expect surface coordinates (not raw mouse coords)
+  void Paint(const LineTool& lt);
+  void Line(const LineTool& lt, coord_t x1, coord_t y1);
+
+  bool painting {false};
+  bool active {false};
 
   struct View {
     View(MDFN_Surface *new_surface);
@@ -165,6 +160,13 @@ private:
   void RecvLine(const char *nick, const char *msg, const uint32 len);
   void RecvSync(const char *nick, const char *msg, const uint32 len);
   void RecvClear(const char *nick, const char *msg, const uint32 len);
+
+  void Paint(
+    coord_t x, coord_t y, wh_t w, wh_t h,
+    const Color& color, const bool broadcast);
+  void Line(
+    coord_t x0, coord_t y0, coord_t x1, coord_t y1,
+    wh_t w, wh_t h, const Color& color, const bool broadcast);
 
   static constexpr limit_t Payload_limit = 20000;
   static constexpr magic_t Magic_id = 0xf171;

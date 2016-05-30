@@ -180,6 +180,15 @@ std::pair<Graffiti::coord_t, Graffiti::coord_t> Graffiti::MouseCoords2SurfaceCoo
   return std::pair<coord_t, coord_t>(xx, yy);
 }
 
+void Graffiti::Paint(const LineTool& lt)
+{
+  Paint(lt.x0, lt.y0, lt.w, lt.h, lt.color, true);
+}
+void Graffiti::Line(const LineTool& lt, coord_t x1, coord_t y1)
+{
+  Line(lt.x0, lt.y0, x1, y1, lt.w, lt.h, lt.color, true);
+}
+
 void Graffiti::Paint(
   coord_t x, coord_t y, wh_t w, wh_t h,
   const Color& color, const bool broadcast)

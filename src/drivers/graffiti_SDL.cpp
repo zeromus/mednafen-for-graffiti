@@ -1,8 +1,5 @@
 #include "graffiti_SDL.h"
 
-Graffiti_SDL::Graffiti_SDL(MDFN_Surface *new_canvas) :Graffiti(new_canvas)
-{}
-
 void Graffiti_SDL::Input_Event(const SDL_Event& event)
 {
   if(!enabled || !active)
@@ -49,10 +46,18 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
       switch (event.button.button)
       {
       case SDL_BUTTON_RIGHT:  // eraser
-        ltool = &eraser_tool;
+        if (ltool != &eraser_tool)
+        {  
+          ltool = &eraser_tool;
+          SetCursor(*ltool);
+        }
         break;
       default:
-        ltool = &line_tool;
+        if (ltool != &line_tool)
+        {  
+          ltool = &line_tool;
+          SetCursor(*ltool);
+        }
         ltool->color = {
           (rand() % 7 + 1) * 32, (rand() % 7 + 1) * 32, (rand() % 7 + 1) * 32
         };
@@ -63,7 +68,7 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
       ltool->x0 = xyc.first;
       ltool->y0 = xyc.second;
 
-      Paint(ltool->x0, ltool->y0, ltool->w, ltool->h, ltool->color, true);
+      Paint(*ltool);
     }
     break;
 
@@ -81,10 +86,10 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
       //MDFN_printf ("painting MOTION\n");
       auto xy = MouseCoords2SurfaceCoords(event.button.x, event.button.y);
       auto xyc = CalculateCenterCoords(xy.first, xy.second, ltool->w, ltool->h);
-      coord_t x1 = xyc.first;
-      coord_t y1 = xyc.second;
+      auto x1 = xyc.first;
+      auto y1 = xyc.second;
 
-      Line(ltool->x0, ltool->y0, x1, y1, ltool->w, ltool->h, ltool->color, true);
+      Line(*ltool, x1, y1);
 
       ltool->x0 = x1;
       ltool->y0 = y1;
@@ -98,4 +103,9 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
 void Graffiti_SDL::ShowCursor(bool s)
 {
   SDL_MDFN_ShowCursor(s);
+}
+
+void Graffiti_SDL::SetCursor(LineTool& lt)
+{
+
 }
