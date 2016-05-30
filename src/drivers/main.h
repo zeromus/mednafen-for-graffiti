@@ -43,9 +43,12 @@ void SendCEvent(unsigned int code, void *data1, void *data2);
 
 void PauseGameLoop(bool p);
 
-struct CursorSpec
+struct CursorSpec_SDL
 {
-  SDL_Cursor* CreateCursor() { return SDL_CreateCursor(data, mask, w, h, hot_x, hot_y); }
+  SDL_Cursor* CreateCursor() {
+    return *cursor = SDL_CreateCursor(data, mask, w, h, hot_x, hot_y);
+  }
+  SDL_Cursor** cursor;
   Uint8 *data;
   Uint8 *mask;
   int w;
@@ -57,7 +60,7 @@ struct CursorSpec
 };
 
 void SDL_MDFN_ShowCursor(int toggle);
-void SDL_MDFN_CreateCursor(SDL_Cursor** cursor, Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y);
+void SDL_MDFN_CreateCursor(CursorSpec_SDL *cs);
 void SDL_MDFN_FreeCursor(SDL_Cursor* cursor);
 void SDL_MDFN_SetCursor(SDL_Cursor* cursor);
 

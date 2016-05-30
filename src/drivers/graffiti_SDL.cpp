@@ -167,6 +167,6 @@ void Graffiti_SDL::SetCursor(LineTool& lt)
     data[y*w8 + (w8-1)] &= 0xfe;
   }
 
-  SDL_MDFN_CreateCursor(&cursor, &data[0], &mask[0], w, h, w/2, h/2);
-  //SDL_MDFN_SetCursor(cursor);
+  CursorSpec_SDL sc = { &cursor, &data[0], &mask[0], w, h, w/2, h/2, true };
+  SDL_MDFN_CreateCursor(&sc);
 }

@@ -1205,25 +1205,36 @@ void SDL_MDFN_ShowCursor(int toggle)
 
 }
 
-void SDL_MDFN_CreateCursor(SDL_Cursor** cursor, Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y)
+void SDL_MDFN_CreateCursor(CursorSpec_SDL *cs)
 { // assumes width and height are sane amounts!
- CursorSpec *cs = (CursorSpec *) malloc(sizeof(CursorSpec));
+ CursorSpec_SDL *new_cs = (CursorSpec_SDL *) malloc(sizeof(CursorSpec_SDL));
+ auto w = cs->w;
+ auto h = cs->h;
  Uint8 *d = (Uint8 *) malloc(sizeof(Uint8) * (w*h));
  Uint8 *m = (Uint8 *) malloc(sizeof(Uint8) * (w*h));
 
  Uint8 *dd = d, *mm = m;
  for (int i=0; i < (w*h); i++)
  {
-  *dd++ = *data++;
-  *mm++ = *mask++;
+  *dd++ = *cs->data++;
+  *mm++ = *cs->mask++;
  }
- *cs = {d, m, w, h, hot_x, hot_y, true};
- // volatile SDL_Cursor* cursor {nullptr};
+
+ *new_cs = *cs;
+ //new_cs->cursor = cs->cursor;
+ new_cs->data = d;
+ new_cs->mask = m;
+ /*new_cs->w = cs->w;
+ new_cs->h = cs->h;
+ new_cs->hot_x = cs->hot_x;
+ new_cs->hot_y = cs->hot_y;
+*/
+ //MDFN_printf("c: %X, d: %X, m: %X, w: %d, h: %d\n", new_cs->)
+
  SDL_Event evt;
  evt.user.type = SDL_USEREVENT;
  evt.user.code = CEVT_CREATECURSOR;
- evt.user.data1 = cs;
- evt.user.data2 = cursor;
+ evt.user.data1 = new_cs;
  SDL_PushEvent(&evt);
 }
 
@@ -1371,11 +1382,10 @@ void PumpWrap(void)
 		 case CEVT_SHOWCURSOR: SDL_ShowCursor(*(int *)event.user.data1); free(event.user.data1); break;
      case CEVT_CREATECURSOR:
       {
-       CursorSpec* cs = (CursorSpec *)event.user.data1;
-       SDL_Cursor** cursor = (SDL_Cursor **)event.user.data2;
-       *cursor = cs->CreateCursor();
+       CursorSpec_SDL* cs = (CursorSpec_SDL *)event.user.data1;
+       cs->CreateCursor();
        if (cs->set)
-        SDL_SetCursor(*cursor);
+        SDL_SetCursor(*cs->cursor);
        free(cs->data); free(cs->mask); free(cs);
       }
       break;
