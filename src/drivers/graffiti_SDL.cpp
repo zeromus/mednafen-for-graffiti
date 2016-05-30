@@ -2,13 +2,7 @@
 
 Graffiti_SDL::Graffiti_SDL(MDFN_Surface *new_canvas) :Graffiti(new_canvas)
 {
-  // line_tool_SDL[LineToolType::line] = {};
-  // line_tool_SDL[LineToolType::eraser] = {
-  //   Default_width * Eraser_scale,
-  //   Default_height * Eraser_scale};
-
-  // for (int i=0; i < LineToolType::amount; i++)
-  //   line_tool[i] = &line_tool_SDL[i];
+  ltool = &line_tool[static_cast<int>(LineToolType::line)];
 }
 
 void Graffiti_SDL::SetScale(scale_t x, scale_t y)
@@ -71,7 +65,21 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
   switch(event.type)
   {
   case SDL_MOUSEBUTTONDOWN:
-    if(event.button.state == SDL_PRESSED)
+    if (event.button.button == SDL_BUTTON_WHEELUP)
+    {
+      LineTool& lt = line_tool[static_cast<int>(LineToolType::line)];
+      int w = lt.w + 2, h = lt.h + 2;
+      if (w > 0 && h > 0)
+        SetLineToolSize(w, h);
+    }
+    else if (event.button.button == SDL_BUTTON_WHEELDOWN)
+    {
+      LineTool& lt = line_tool[static_cast<int>(LineToolType::line)];
+      int w = lt.w - 2, h = lt.h - 2;
+      if (w > 0 && h > 0)
+        SetLineToolSize(w, h);
+    }
+    else if(event.button.state == SDL_PRESSED)
     {
       MDFN_printf ("painting TRUE\n");
       painting = true;
@@ -112,6 +120,7 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
       painting = false;
       SDL_MDFN_SetCursor(tool_cursor[static_cast<int>(LineToolType::line)]);
       ShowCursor(true);
+      ltool = &line_tool[static_cast<int>(LineToolType::line)];
     }
     break;
 
