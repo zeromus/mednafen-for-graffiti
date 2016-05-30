@@ -26,7 +26,6 @@ private:
   LineTool *ltool {nullptr};
   
   SDL_Cursor *tool_cursor[static_cast<int>(LineToolType::amount)] {nullptr, nullptr};
-  SDL_Cursor *blank_cursor {nullptr};
   SDL_Cursor *syscursor {SDL_GetCursor()};
 
   void CreateCursor(LineToolType ltt, bool set);

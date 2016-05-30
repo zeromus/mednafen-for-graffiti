@@ -1206,15 +1206,18 @@ void SDL_MDFN_ShowCursor(int toggle)
 }
 
 void SDL_MDFN_CreateCursor(CursorSpec_SDL *cs)
-{ // assumes width and height are sane amounts!
+{ // assumes width and height are sane amounts! (width must be multiple of 8 on SDL1)
  CursorSpec_SDL *new_cs = (CursorSpec_SDL *) malloc(sizeof(CursorSpec_SDL));
  auto w = cs->w;
+ auto w8 = w/8;
  auto h = cs->h;
- Uint8 *d = (Uint8 *) malloc(sizeof(Uint8) * (w*h));
- Uint8 *m = (Uint8 *) malloc(sizeof(Uint8) * (w*h));
+
+ assert(w && !(w % 8));
+ Uint8 *d = (Uint8 *) malloc(sizeof(Uint8) * (w8*h));
+ Uint8 *m = (Uint8 *) malloc(sizeof(Uint8) * (w8*h));
 
  Uint8 *dd = d, *mm = m;
- for (int i=0; i < (w*h); i++)
+ for (int i=0; i < (w8*h); i++)
  {
   *dd++ = *cs->data++;
   *mm++ = *cs->mask++;

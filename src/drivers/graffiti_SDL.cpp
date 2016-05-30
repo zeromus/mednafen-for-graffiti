@@ -193,7 +193,8 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
   MDFN_printf("w: %d, h: %d\n", w, h);
 
   w = fix(w);
-  h = fix(h);
+  h = fix(h); // technically, h need not be a multiple of 8, but 8x1 cursor for
+              // a 1x1 pixel is ugly, so I fix the height too
 
   MDFN_printf("w2: %d, h2: %d\n", w, h);
 
