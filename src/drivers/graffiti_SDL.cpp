@@ -141,30 +141,42 @@ void Graffiti_SDL::SetCursor(LineTool& lt)
   coord_t w = lt.w * view.xscale;
   coord_t h = lt.h * view.yscale;
 
-  MDFN_printf("w: %d, h: %d\n", w, h);
+  // MDFN_printf("w: %d, h: %d\n", w, h);
 
   w = fix(w);
   h = fix(h);
 
-  MDFN_printf("w2: %d, h2: %d\n", w, h);
+  // MDFN_printf("w2: %d, h2: %d\n", w, h);
 
   auto w8 = w/8;
 
-  MDFN_printf("w8: %d\n", w8);
+  // MDFN_printf("w8: %d\n", w8);
 
 
-  std::vector<uint8> data(w8*h, 255), mask(w8*h, 255);
+  std::vector<uint8> data(w8*h, 0), mask(w8*h, 0);
 
   // want to outline the edge!
   for (int x=0; x < w8; x++)
   {
-    data[x] = 0x0;
-    data[(h-1)*w8 + x] = 0;
+    mask[x] = 0xff;
+    mask[(h-1)*w8 + x] = 0xff;
+
+    uint8 v;
+    if (!x) v = 0x7f; else if (x == w8-1) v = 0xfe; else v = 0xff;
+    mask[(1)*w8 + x] = v;
+    mask[(h-1-1)*w8 + x] = v;
+    data[(1)*w8 + x] = v;
+    data[(h-1-1)*w8 + x] = v;
+    if (!x) v = 0x3f; else if (x == w8-1) v = 0xfc; else v = 0xff;
+    mask[(2)*w8 + x] = v;
+    mask[(h-1-2)*w8 + x] = v;
   }
   for (int y=1; y < (h-1); y++)
   {
-    data[y*w8 + 0] = 0x7f;
-    data[y*w8 + (w8-1)] &= 0xfe;
+    mask[y*w8 + 0] |= 0xe0;
+    mask[y*w8 + (w8-1)] |= 0x07;
+    data[y*w8 + 0] |= 0x40;
+    data[y*w8 + (w8-1)] |= 0x02;
   }
 
   CursorSpec_SDL sc = { &cursor, &data[0], &mask[0], w, h, w/2, h/2, true };
