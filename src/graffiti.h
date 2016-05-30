@@ -44,7 +44,9 @@ Bresenham Line algo from http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_a
 
 class Graffiti : public MDFNNP_STC
 {
+public:
   using scale_t = double;
+  using coord_t = uint16;
   using wh_t = uint16;  // width/height
   using color_t = uint32;
   using cmd_t = uint8;
@@ -108,7 +110,6 @@ public:
   void Send(Command command);
 
 protected:
-  using coord_t = uint16;
   // Call from driver mouse-capture routine
   std::pair<coord_t, coord_t> MouseCoords2SurfaceCoords(coord_t x, coord_t y);
 
@@ -126,6 +127,7 @@ protected:
   struct LineTool {
     LineTool() = default;
     LineTool(wh_t w, wh_t h, Color c={0,0,0}) : w{w}, h{h}, color{c} {}
+    //virtual ~LineTool();
     void SetSize(wh_t w, wh_t h) { if(w) this->w = w; if(h) this->h = h; }
     wh_t w{Default_width}, h{Default_height};
     coord_t x0 {0}, y0 {0};

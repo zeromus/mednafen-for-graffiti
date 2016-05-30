@@ -1205,6 +1205,46 @@ void SDL_MDFN_ShowCursor(int toggle)
 
 }
 
+void SDL_MDFN_CreateCursor(SDL_Cursor** cursor, Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y)
+{ // assumes width and height are sane amounts!
+ CursorSpec *cs = (CursorSpec *) malloc(sizeof(CursorSpec));
+ Uint8 *d = (Uint8 *) malloc(sizeof(Uint8) * (w*h));
+ Uint8 *m = (Uint8 *) malloc(sizeof(Uint8) * (w*h));
+
+ Uint8 *dd = d, *mm = m;
+ for (int i=0; i < (w*h); i++)
+ {
+  *dd++ = *data++;
+  *mm++ = *mask++;
+ }
+ *cs = {d, m, w, h, hot_x, hot_y, true};
+ // volatile SDL_Cursor* cursor {nullptr};
+ SDL_Event evt;
+ evt.user.type = SDL_USEREVENT;
+ evt.user.code = CEVT_CREATECURSOR;
+ evt.user.data1 = cs;
+ evt.user.data2 = cursor;
+ SDL_PushEvent(&evt);
+}
+
+void SDL_MDFN_FreeCursor(SDL_Cursor* cursor)
+{
+ SDL_Event evt;
+ evt.user.type = SDL_USEREVENT;
+ evt.user.code = CEVT_FREECURSOR;
+ evt.user.data1 = cursor;
+ SDL_PushEvent(&evt);
+}
+
+void SDL_MDFN_SetCursor(SDL_Cursor* cursor)
+{
+ SDL_Event evt;
+ evt.user.type = SDL_USEREVENT;
+ evt.user.code = CEVT_SETCURSOR;
+ evt.user.data1 = cursor;
+ SDL_PushEvent(&evt);
+}
+
 void GT_ToggleFS(void)
 {
  MDFND_LockMutex(VTMutex);
@@ -1329,6 +1369,18 @@ void PumpWrap(void)
 		 //case CEVT_TOGGLEFS: NeedVideoChange = 1; break;
 		 //case CEVT_VIDEOSYNC: NeedVideoChange = -1; break;
 		 case CEVT_SHOWCURSOR: SDL_ShowCursor(*(int *)event.user.data1); free(event.user.data1); break;
+     case CEVT_CREATECURSOR:
+      {
+       CursorSpec* cs = (CursorSpec *)event.user.data1;
+       SDL_Cursor** cursor = (SDL_Cursor **)event.user.data2;
+       *cursor = cs->CreateCursor();
+       if (cs->set)
+        SDL_SetCursor(*cursor);
+       free(cs->data); free(cs->mask); free(cs);
+      }
+      break;
+     case CEVT_FREECURSOR: SDL_FreeCursor((SDL_Cursor *)event.user.data1); break;
+     case CEVT_SETCURSOR: SDL_SetCursor((SDL_Cursor *)event.user.data1); break;
 	  	 case CEVT_DISP_MESSAGE: VideoShowMessage((char*)event.user.data1); break;
 		 default: 
 			if(numevents < gtevents_size)
