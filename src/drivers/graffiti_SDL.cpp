@@ -46,11 +46,11 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
     {
     case CEVT_SET_INPUT_FOCUS:
       if (!MDFNDHaveFocus)
-        SDL_SetCursor(syscursor);
+        SDL_MDFN_SetCursor(syscursor);
       else
       {
         ignore = true;
-        SDL_SetCursor(tool_cursor[static_cast<int>(LineToolType::line)]);
+        SDL_MDFN_SetCursor(tool_cursor[static_cast<int>(LineToolType::line)]);
       }
       MDFN_printf("CEVT_SET_INPUT_FOCUS event\n");
       return;
