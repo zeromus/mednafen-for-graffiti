@@ -187,8 +187,14 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
 
   MDFN_printf("lt.w: %d, lt.h: %d\n", lt.w, lt.h);
 
-  coord_t w = (lt.w+2) * view.xscale;
-  coord_t h = (lt.h+2) * view.yscale;
+  coord_t pad=0;
+  if (ltt == LineToolType::line)
+    pad = 2;
+  else if (ltt == LineToolType::eraser)
+    pad = 6;
+
+  coord_t w = lt.w * view.xscale + pad;
+  coord_t h = lt.h * view.yscale + pad;
 
   auto dx = w % 8;
   MDFN_printf("w: %d, h: %d, dx: %d\n", w, h, dx);
@@ -199,7 +205,7 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
 
   MDFN_printf("w2: %d, h2: %d\n", mouse_w, h);
 
-  auto w8 = mouse_w/8;
+  int w8 = mouse_w/8;
 
   MDFN_printf("w8: %d\n", w8);
 
@@ -237,31 +243,65 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
     // want to outline the edge!
     for (int x=0; x < w8; x++)
     {
-      mask[x] = 0xff;
-      mask[(h-1)*w8 + x] = 0xff;
+      // correct
+      uint8 v = (x == (w8-1) && dx) ? Lut[dx] : 0xff;
+      mask[x] = v;              // top white border (horiz)
+      mask[(h-1)*w8 + x] = v;   // bottom white border (horiz)
 
-      uint8 v;
-      if (h >= 2)
+      constexpr uint8 Lut2[] = {0xfe, 0, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe, 0xff};
+
+      // correct
+      if (x == (w8-1))
+        v = Lut2[dx];
+      else v = 0xff;
+      if (!x) v &= ~0x80; // mask out the very first bit
+
+      printf("v: 0x%02x\n", v);
+
+      mask[(1)*w8 + x] |= v;
+      data[(1)*w8 + x] |= v;
+      mask[(h-1-1)*w8 + x] |= v;
+      data[(h-1-1)*w8 + x] |= v;
+
+      // uint16 m = 0;
+      // uint8  mh = 0;
+      // uint8  ml = 0;
+      if (x == (w8-1))
       {
-        if (!x) v = 0x7f; else if (x == w8-1) v = 0xfe; else v = 0xff;
-        mask[(1)*w8 + x] = v;
-        data[(1)*w8 + x] = v;
-        mask[(h-1-1)*w8 + x] = v;
-        data[(h-1-1)*w8 + x] = v;
+        v = Lut2[dx] << 1;
+
+        if (dx == 1)
+        {
+          mask[(2)*w8 + x - 1] &= ~1;
+          mask[(h-1-2)*w8 + x - 1] &= ~1;
+        }
       }
-      if (h >= 3)
-      {
-        if (!x) v = 0x3f; else if (x == w8-1) v = 0xfc; else v = 0xff;
-        mask[(2)*w8 + x] = v;
-        mask[(h-1-2)*w8 + x] = v;
-      }
+      else v = 0xff;
+      if (!x) v &= ~0xc0;
+
+      mask[(2)*w8 + x] = v;
+      mask[(h-1-2)*w8 + x] = v;
     }
     for (int y=1; y < (h-1); y++)
     {
-      mask[y*w8 + 0] |= 0xe0;
-      mask[y*w8 + (w8-1)] |= 0x07;
-      data[y*w8 + 0] |= 0x40;
-      data[y*w8 + (w8-1)] |= 0x02;
+      // mask[y*w8 + 0] |= 0xe0;
+      // data[y*w8 + 0] |= 0x40;
+
+      // uint16 m = 0x07 << 8-dx;
+      // uint16 d = 0x02 << 8-dx;
+
+      // uint8 mh = m >> 8;
+      // uint8 ml = m & 0xff;
+      // uint8 dh = d >> 8;
+      // uint8 dl = d & 0xff;
+
+      // if (w8-2 >= 0)
+      // {
+      //   mask[y*w8 + (w8-1)] |= mh;
+      //   data[y*w8 + (w8-1)] |= dh;
+      // }
+      // mask[y*w8 + (w8-1)] |= ml;
+      // data[y*w8 + (w8-1)] |= dl;
     }
     CursorSpec_SDL sc = { &tool_cursor[ti], &data[0], &mask[0], mouse_w, h, w/2, h/2, set };
     SDL_MDFN_CreateCursor(&sc);

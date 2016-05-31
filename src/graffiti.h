@@ -124,7 +124,7 @@ protected:
   };
 
   static constexpr wh_t Default_width = 5, Default_height = 5;
-  static constexpr scale_t Eraser_scale = 2.5;
+  static constexpr scale_t Eraser_scale = 1;
   struct LineTool {
     LineTool() = default;
     LineTool(wh_t w, wh_t h, Color c={0,0,0}) : w{w}, h{h}, color{c} {}
