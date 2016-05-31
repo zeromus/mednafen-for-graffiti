@@ -284,24 +284,23 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
     }
     for (int y=1; y < (h-1); y++)
     {
-      // mask[y*w8 + 0] |= 0xe0;
-      // data[y*w8 + 0] |= 0x40;
+      mask[y*w8 + 0] |= 0xe0;
+      data[y*w8 + 0] |= 0x40;
 
-      // uint16 m = 0x07 << 8-dx;
-      // uint16 d = 0x02 << 8-dx;
+      uint16 m = 0x07 << 8-dx;
+      uint16 d = 0x02 << 8-dx;
 
-      // uint8 mh = m >> 8;
-      // uint8 ml = m & 0xff;
-      // uint8 dh = d >> 8;
-      // uint8 dl = d & 0xff;
+      uint8 mh = m >> 8;
+      uint8 ml = m & 0xff;
+      uint8 dh = d >> 8;
+      uint8 dl = d & 0xff;
 
-      // if (w8-2 >= 0)
-      // {
-      //   mask[y*w8 + (w8-1)] |= mh;
-      //   data[y*w8 + (w8-1)] |= dh;
-      // }
-      // mask[y*w8 + (w8-1)] |= ml;
-      // data[y*w8 + (w8-1)] |= dl;
+      int proper = (dx == 2 || dx == 1) ? w8-2 : w8-1;
+      mask[y*w8 + proper] |= mh;
+      data[y*w8 + proper] |= dh;
+      
+      mask[y*w8 + (w8-1)] |= ml;
+      data[y*w8 + (w8-1)] |= dl;
     }
     CursorSpec_SDL sc = { &tool_cursor[ti], &data[0], &mask[0], mouse_w, h, w/2, h/2, set };
     SDL_MDFN_CreateCursor(&sc);
