@@ -191,7 +191,7 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
   if (ltt == LineToolType::line)
     pad = 2;
   else if (ltt == LineToolType::eraser)
-    pad = 6;
+    pad = 4;
 
   coord_t w = lt.w * view.xscale + pad;
   coord_t h = lt.h * view.yscale + pad;
@@ -233,7 +233,8 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
       }
     }
 
-    CursorSpec_SDL sc = { &tool_cursor[ti], &data[0], &mask[0], mouse_w, h, w/2, h/2, set };
+    CursorSpec_SDL sc = { &tool_cursor[ti], &data[0], &mask[0], mouse_w, h,
+      floor(0.5 + (w/2)), floor(0.5 + (h/2)), set };
     SDL_MDFN_CreateCursor(&sc);
   }
   else if (ltt == LineToolType::eraser)
@@ -263,31 +264,28 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
       mask[(h-1-1)*w8 + x] |= v;
       data[(h-1-1)*w8 + x] |= v;
 
-      // uint16 m = 0;
-      // uint8  mh = 0;
-      // uint8  ml = 0;
-      if (x == (w8-1))
-      {
-        v = Lut2[dx] << 1;
+      // if (x == (w8-1))
+      // {
+      //   v = Lut2[dx] << 1;
 
-        if (dx == 1)
-        {
-          mask[(2)*w8 + x - 1] &= ~1;
-          mask[(h-1-2)*w8 + x - 1] &= ~1;
-        }
-      }
-      else v = 0xff;
-      if (!x) v &= ~0xc0;
+      //   if (dx == 1)
+      //   {
+      //     mask[(2)*w8 + x - 1] &= ~1;
+      //     mask[(h-1-2)*w8 + x - 1] &= ~1;
+      //   }
+      // }
+      // else v = 0xff;
+      // if (!x) v &= ~0xc0;
 
-      mask[(2)*w8 + x] = v;
-      mask[(h-1-2)*w8 + x] = v;
+      // mask[(2)*w8 + x] = v;
+      // mask[(h-1-2)*w8 + x] = v;
     }
     for (int y=1; y < (h-1); y++)
     {
-      mask[y*w8 + 0] |= 0xe0;
+      mask[y*w8 + 0] |= 0xc0;
       data[y*w8 + 0] |= 0x40;
 
-      uint16 m = 0x07 << 8-dx;
+      uint16 m = 0x03 << 8-dx;
       uint16 d = 0x02 << 8-dx;
 
       uint8 mh = m >> 8;
@@ -302,7 +300,8 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
       mask[y*w8 + (w8-1)] |= ml;
       data[y*w8 + (w8-1)] |= dl;
     }
-    CursorSpec_SDL sc = { &tool_cursor[ti], &data[0], &mask[0], mouse_w, h, w/2, h/2, set };
+    CursorSpec_SDL sc = { &tool_cursor[ti], &data[0], &mask[0], mouse_w, h,
+      floor(0.5 + (w/2)), floor(0.5 + (h/2)), set };
     SDL_MDFN_CreateCursor(&sc);
   }
 }

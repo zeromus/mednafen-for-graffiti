@@ -347,8 +347,8 @@ void Graffiti::RecvClear(const char *nick, const char *msg, const uint32 len)
 
 std::pair<Graffiti::coord_t, Graffiti::coord_t> Graffiti::CalculateCenterCoords(coord_t x, coord_t y, wh_t w, wh_t h)
 {
-  auto hw = (w / 2);
-  auto hh = (h / 2);
+  auto hw = floor(0.5 + (w / 2));
+  auto hh = floor(0.5 + (h / 2));
   return std::pair<coord_t, coord_t>(
     x < hw ? 0 : x - hw,
     y < hh ? 0 : y - hh);
