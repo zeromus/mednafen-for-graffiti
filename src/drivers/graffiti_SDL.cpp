@@ -81,11 +81,8 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
     }
     else if(event.button.state == SDL_PRESSED)
     {
-      MDFN_printf ("painting TRUE\n");
-      painting = true;
-      auto xy = MouseCoords2SurfaceCoords(event.button.x, event.button.y);
-
       LineToolType ti = LineToolType::line;
+
       switch (event.button.button)
       {
       case SDL_BUTTON_RIGHT:  // eraser
@@ -93,6 +90,9 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
         ltool = &line_tool[static_cast<int>(ti)];
         SetCursor(ti);
         break;
+      case SDL_BUTTON_MIDDLE:
+        SetLineToolSize(Default_width, Default_height);
+        return;
       default:
         ti = LineToolType::line;
         ltool = &line_tool[static_cast<int>(ti)];
@@ -104,6 +104,9 @@ void Graffiti_SDL::Input_Event(const SDL_Event& event)
         break;
       }
 
+      MDFN_printf ("painting TRUE\n");
+      painting = true;
+      auto xy = MouseCoords2SurfaceCoords(event.button.x, event.button.y);
       auto xyc = CalculateCenterCoords(xy.first, xy.second, ltool->w, ltool->h);
 
       ltool->x0 = xyc.first;
