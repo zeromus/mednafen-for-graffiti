@@ -1,30 +1,36 @@
 // graffiti.h: It's FREAKIN GRAFFITI OVER NETPLAY
 /*
-Graffiti allows you to draw on the surface of your game. It's intended to be a fun
-addition to the netplay experience.
+Graffiti allows you to draw on the surface of your game. It can be used locally
+or during netplay. It is intended to be a fun addition to the netplay experience.
 
 History: Zeromus gave birth to this idea when I was playing a round of Kirby's
-Dream Course with him over net play. I quote:
+Dream Course with him over netplay. I quote:
 <zeromus> you know what would be fun is if you could draw graffiti on a netplay session
 
-I felt like I could accomplish it, but I was very busy at the time. So I filed
-it as a TODO item on my mednafen Github repository and in a couple weeks began
-working full time on it. It's been about 3 days now and it's almost finished.
+I've been working on the feature 1 week so far.
 */
 
 /* Working emulators "out-of-the-box" (default settings tested only)
-  - SNES
-  - NES
-  - NGP
-  - GBC
-  - SMS
+  - snes
+  - nes
+  - ngp
+  - gbc
+  - sms
+
+Emulators that work now but needed modification:
+  - snes_faust (required migrating snes mouse scale/offset settings to snes_faust)
 
 Problematic Emulators
-  - PCE (needs mouse scroll/offset setting impl!)
+  - pce (needs mouse scroll/offset setting impl!)
+  - psx (apparently my usage of mouse scale/offset is incorrect because this is awful!)
+    - I have confirmed that the psx module itself correctly uses the mouse scale
+    and offset settings because I tried using a Konami Justifier game (Area 51)
 
 Unlisted emulators haven't been tested yet
 
 Bresenham Line algo from http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C
+Mednafen has a line drawing function in primitives.cpp but I don't use it because it
+lacks width and height arguments.
 */
 /* CRITICAL CHANGES
  * Increased MDFNNP_STC size from 2,000 to 20,000
@@ -53,7 +59,7 @@ public:
   enum Command : cmd_t { paint, line, sync, clear };
   // I am using older style enum because it is easier to cast, given that I
   // cast to/from this enum through template functions...
-  // (MDFNNP_STC class's << and >> operators)
+  // (MDFNNP_STC << and >> operators)
 
 public:
   static const CommandEntry ConsoleCommandEntry;

@@ -188,7 +188,7 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
 
   LineTool& lt = line_tool[ti];
 
-  MDFN_printf("lt.w: %d, lt.h: %d\n", lt.w, lt.h);
+  //MDFN_printf("lt.w: %d, lt.h: %d\n", lt.w, lt.h);
 
   coord_t pad=0;
   if (ltt == LineToolType::line)
@@ -200,22 +200,24 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
   coord_t h = lt.h * view.yscale + pad;
 
   auto dx = w % 8;
-  MDFN_printf("w: %d, h: %d, dx: %d\n", w, h, dx);
+  //MDFN_printf("w: %d, h: %d, dx: %d\n", w, h, dx);
 
   auto mouse_w = fix(w);
   //h = fix(h); // technically, h need not be a multiple of 8, but 8x1 cursor for
               // a 1x1 pixel is ugly, so I fix the height too
 
-  MDFN_printf("w2: %d, h2: %d\n", mouse_w, h);
+  //MDFN_printf("w2: %d, h2: %d\n", mouse_w, h);
 
   int w8 = mouse_w/8;
 
-  MDFN_printf("w8: %d\n", w8);
+  //MDFN_printf("w8: %d\n", w8);
 
   constexpr uint8 Lut[] = {0x0, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe};
 
   if (ltt == LineToolType::line)
-  {
+  { // Prints a white-border with black-inner-fill cursor such that the black
+    // is the dimensions of the pixel-to-be-plotted. It can be pretty accurate,
+    // though not always precise (given complexities of screen scaling, aspect ratio, etc)
     std::vector<uint8> data(w8*h, 255), mask(w8*h, 255);
 
     // want to outline the edge!
@@ -241,47 +243,31 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
     SDL_MDFN_CreateCursor(&sc);
   }
   else if (ltt == LineToolType::eraser)
-  {
+  { // prints a white border followed by an inner black border. the inside is
+    // transparent to allow the user to see what they are erasing. Same precision
+    // constraints as mentioned for the line tool are present.
     std::vector<uint8> data(w8*h, 0), mask(w8*h, 0);
 
     // want to outline the edge!
     for (int x=0; x < w8; x++)
     {
-      // correct
       uint8 v = (x == (w8-1) && dx) ? Lut[dx] : 0xff;
       mask[x] = v;              // top white border (horiz)
       mask[(h-1)*w8 + x] = v;   // bottom white border (horiz)
 
       constexpr uint8 Lut2[] = {0xfe, 0, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe, 0xff};
 
-      // correct
       if (x == (w8-1))
         v = Lut2[dx];
       else v = 0xff;
       if (!x) v &= ~0x80; // mask out the very first bit
 
-      printf("v: 0x%02x\n", v);
+      //MDFN_printf("v: 0x%02x\n", v);
 
       mask[(1)*w8 + x] |= v;
       data[(1)*w8 + x] |= v;
       mask[(h-1-1)*w8 + x] |= v;
       data[(h-1-1)*w8 + x] |= v;
-
-      // if (x == (w8-1))
-      // {
-      //   v = Lut2[dx] << 1;
-
-      //   if (dx == 1)
-      //   {
-      //     mask[(2)*w8 + x - 1] &= ~1;
-      //     mask[(h-1-2)*w8 + x - 1] &= ~1;
-      //   }
-      // }
-      // else v = 0xff;
-      // if (!x) v &= ~0xc0;
-
-      // mask[(2)*w8 + x] = v;
-      // mask[(h-1-2)*w8 + x] = v;
     }
     for (int y=1; y < (h-1); y++)
     {
@@ -312,7 +298,6 @@ void Graffiti_SDL::CreateCursor(LineToolType ltt, bool set)
 void Graffiti_SDL::SetLineToolSize(wh_t w, wh_t h)
 {
   Graffiti::SetLineToolSize(w, h);
-  // CreateLineToolCursors();
   for (int i=0; i < static_cast<int>(LineToolType::amount); i++)
   {
     bool set = false;
