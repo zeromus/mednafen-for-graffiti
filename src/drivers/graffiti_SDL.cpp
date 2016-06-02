@@ -303,7 +303,7 @@ void Graffiti_SDL::SetLineToolSize(wh_t w, wh_t h)
     bool set = false;
     if (ltool == &line_tool[i])
     {
-      printf ("i == %d\n", i);
+      //MDFN_printf ("i == %d\n", i);
       set = true;
     }
     CreateCursor(static_cast<LineToolType>(i), set);
