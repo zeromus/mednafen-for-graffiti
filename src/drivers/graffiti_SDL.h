@@ -13,14 +13,8 @@ public:
   void Input_Event(const SDL_Event& event);
 
   void SetScale(scale_t x, scale_t y);
-
-  void Enable(bool e=true);
-
-  // struct LineTool_SDL : public LineTool {
-  //   using LineTool::LineTool;
-  //   void SetSize(wh_t w, wh_t h);
-  // } line_tool_SDL[LineTool::amount];
   void SetLineToolSize(wh_t w, wh_t h);
+  void Enable(bool e=true);
 
 private:
   LineTool *ltool {nullptr};

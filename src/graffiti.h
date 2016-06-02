@@ -1,5 +1,7 @@
-// graffiti.h: It's FREAKIN GRAFFITI OVER NETPLAY
-/*
+/* graffiti.h: It's FREAKIN GRAFFITI OVER NETPLAY
+
+Copyright (c) 2016 Michael Bazzinotti
+
 Graffiti allows you to draw on the surface of your game. It can be used locally
 or during netplay. It is intended to be a fun addition to the netplay experience.
 
@@ -7,10 +9,7 @@ History: Zeromus gave birth to this idea when I was playing a round of Kirby's
 Dream Course with him over netplay. I quote:
 <zeromus> you know what would be fun is if you could draw graffiti on a netplay session
 
-I've been working on the feature 1 week so far.
-*/
-
-/* Working emulators "out-of-the-box" (default settings tested only)
+Working emulators "out-of-the-box" (default settings tested only)
   - snes
   - nes
   - ngp
@@ -31,13 +30,36 @@ Unlisted emulators haven't been tested yet
 Bresenham Line algo from http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C
 Mednafen has a line drawing function in primitives.cpp but I don't use it because it
 lacks width and height arguments.
-*/
-/* CRITICAL CHANGES
+
+CRITICAL CHANGES
  * Increased MDFNNP_STC size from 2,000 to 20,000
   * I WILL be incorporating a new implementation so that each Textcommand has its own limit,
   and so that regular MDFNNP_STC message limit is once again restored to original value.
 
  * Added MDFN_Surface::Size function
+///////////////////////////////////////
+// UNDERLYING IMPLEMENTATION SUMMARY //
+///////////////////////////////////////
+Q: How does Graffiti transfer the screen?
+A: That depends on whether new users are:
+
+  - joining a pre-existing session
+  - actively playing together
+
+The latter will be explained first. Instead of communicating raw surface data
+the paint events themselves are transported. Surface drawing is done locally by
+all clients, based on local events and events received over netplay.
+
+"syncing" new users who are joining a netplay session -- in this case, the
+connected client who receives the already prevalent MDFNNPCMD_REQUEST_STATE
+will now also broadcast a compressed, system-agnostic surface
+(although, this currently is "unadaptively" a 32bpp surface since that's the only
+current surface format mednafen uses AFAIK). The compression used is the exact
+same style as used for transport of the gameplay state.
+
+The other stuff is mostly GUI-related.
+one of the neat points I recall was getting the new surface blitted to the
+gameplay surface before scaling operations are done.
 */
 #ifndef __MDFN_NETPLAY_GRAFFITI_H
 #define __MDFN_NETPLAY_GRAFFITI_H
@@ -58,7 +80,7 @@ public:
   using cmd_t = uint8;
   enum Command : cmd_t { paint, line, sync, clear };
   // I am using older style enum because it is easier to cast, given that I
-  // cast to/from this enum through template functions...
+  // cast to/from this enum through template functions.
   // (MDFNNP_STC << and >> operators)
 
 public:
