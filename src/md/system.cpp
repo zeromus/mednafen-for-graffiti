@@ -564,6 +564,11 @@ static void LoadCommonPost(const md_game_info &ginfo)
 
  MDFNGameInfo->LayerNames = "BG0\0BG1\0OBJ\0";
 
+ MDFNGameInfo->mouse_scale_x = 320.0 / MDFNGameInfo->nominal_width;
+ MDFNGameInfo->mouse_scale_y = 1.0;
+ MDFNGameInfo->mouse_offs_x = 0.0;
+ MDFNGameInfo->mouse_offs_y = 8.0;  // I'm not sure if there is a formula
+
  //
  //
  {
