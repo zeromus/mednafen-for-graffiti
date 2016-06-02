@@ -500,6 +500,12 @@ static int LoadCommon(void)
 
   MDFNGameInfo->lcm_width = MDFN_GetSettingB("pce.h_overscan") ? 1120 : 1024;
   MDFNGameInfo->lcm_height = MDFNGameInfo->nominal_height;
+
+  MDFNGameInfo->mouse_scale_x = 256.0 / MDFNGameInfo->nominal_width;
+  MDFNGameInfo->mouse_scale_y = 1.0;
+  MDFNGameInfo->mouse_offs_x = 0.0;
+  // I'm unsure if there is a formula behind 14.0
+  MDFNGameInfo->mouse_offs_y = 14.0 + MDFN_GetSettingUI("pce.slstart");
  }
 
  vce->SetShowHorizOS(MDFN_GetSettingB("pce.h_overscan")); 
